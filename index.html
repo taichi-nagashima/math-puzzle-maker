@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>プリント裏の「ひらめき数学」メーカー</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --subtext: #64748b;
+      --border: #e2e8f0;
+      --accent: #f59e0b;
+      --success: #10b981;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 20px 16px 60px;
+    }
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    header h1 {
+      font-size: 1.4rem;
+      margin: 0 0 6px;
+      color: var(--primary);
+    }
+    header p {
+      font-size: 0.9rem;
+      color: var(--subtext);
+      margin: 0;
+    }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+    }
+    select, input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background: #fff;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 12px;
+    }
+    .btn-main {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-main:hover { background: var(--primary-hover); }
+    .btn-main:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+    .ng-section {
+      margin-top: 12px;
+      font-size: 0.85rem;
+    }
+    .ng-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .ng-tag {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 4px 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+    }
+    .ng-tag button {
+      border: none;
+      background: none;
+      color: #ef4444;
+      cursor: pointer;
+      font-weight: bold;
+      padding: 0;
+    }
+    .add-ng-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .btn-sub {
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .btn-sub:hover { background: #e2e8f0; }
+    .problem-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .badge {
+      display: inline-block;
+      background: #dbeafe;
+      color: #1e40af;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+    .problem-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 0 0 12px;
+    }
+    .question-box {
+      background: #f8fafc;
+      border-left: 4px solid var(--primary);
+      padding: 14px;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      margin-bottom: 12px;
+      font-size: 0.96rem;
+    }
+    .hint-box {
+      font-size: 0.88rem;
+      color: #b45309;
+      background: #fffbeb;
+      padding: 10px 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    details {
+      background: #f1f5f9;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .answer-content {
+      margin-top: 10px;
+      font-size: 0.92rem;
+      white-space: pre-wrap;
+      border-top: 1px solid #cbd5e1;
+      padding-top: 10px;
+    }
+    .card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .btn-adopt {
+      background: #ecfdf5;
+      color: #047857;
+      border-color: #a7f3d0;
+    }
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e293b;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>プリント裏の「ひらめき数学」メーカー</h1>
+      <p>全学年が2〜3分のひらめき＋簡単な計算でスッキリ解ける問題を自動作成</p>
+    </header>
+
+    <div class="panel">
+      <div class="row">
+        <div class="form-group">
+          <label for="category">問題の系統</label>
+          <select id="category">
+            <option value="おまかせ（系統が被らないようにバランスよく選択）">おまかせ（系統が被らないように自動選択）</option>
+            <option value="視点の逆転（まともに数えず裏側から見て1回の計算で解く）">① 視点の逆転（裏側から見て即答する）</option>
+            <option value="小さな数で実験・周期性の発見（少し書き出すとループや規則が見える）">② 小さな数で実験・周期性の発見</option>
+            <option value="ずらしてまとめる（道や階段状の長さを寄せて簡単に計算する）">③ ずらしてまとめる（図形・長さの工夫）</option>
+            <option value="直感のズレ・重なりの罠（植木算、のりしろ、時計、カレンダーなど）">④ 直感のズレ・重なりの罠</option>
+            <option value="基準からのズレ・天秤推理（基準との差やくらべっこで暗算する）">⑤ 基準からのズレ・天秤推理</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="count">作成する問題数</label>
+          <select id="count">
+            <option value="1">1問</option>
+            <option value="2" selected>2問</option>
+            <option value="3">3問</option>
+            <option value="5">5問</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="customNote">ちょっとした要望（任意）</label>
+        <input type="text" id="customNote" placeholder="例：お菓子や部活の話題で、少し優しめで、など（空欄でOK）">
+      </div>
+
+      <button id="generateBtn" class="btn-main" onclick="generateProblems()">問題を生成する</button>
+
+      <div class="ng-section">
+        <details>
+          <summary>出題済み・除外リスト（同じ系統を出さない設定）を確認・編集</summary>
+          <p style="margin: 8px 0 4px; color: var(--subtext);">ここに登録された問題と似たトリックは自動的に除外されます。</p>
+          <div id="ngTagsContainer" class="ng-tags"></div>
+          <div class="add-ng-row">
+            <input type="text" id="newNgInput" placeholder="除外したい過去ネタを追加（例：トーナメントの試合数）">
+            <button class="btn-sub" onclick="addManualNg()">追加</button>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <div id="resultsContainer"></div>
+  </div>
+
+  <div id="toast" class="toast">コピーしました！</div>
+
+  <script>
+    // ★手順2で発行したGASのウェブアプリURLをここに貼り付けてください
+    const GAS_WEB_APP_URL = "ここにGASのウェブアプリURLを貼り付け";
+
+    const DEFAULT_NG_LIST = [
+      "1+2+...+100のようなガウス算・ペア相殺の計算",
+      "2026×2026-2025×2027のような数の置き換え計算",
+      "x+yからx^2+xy+y^2を求める文字式の塊変形"
+    ];
+
+    function getNgList() {
+      const saved = localStorage.getItem("math_puzzle_ng_list");
+      if (!saved) {
+        localStorage.setItem("math_puzzle_ng_list", JSON.stringify(DEFAULT_NG_LIST));
+        return DEFAULT_NG_LIST;
+      }
+      return JSON.parse(saved);
+    }
+
+    function saveNgList(list) {
+      localStorage.setItem("math_puzzle_ng_list", JSON.stringify(list));
+      renderNgTags();
+    }
+
+    function renderNgTags() {
+      const container = document.getElementById("ngTagsContainer");
+      const list = getNgList();
+      container.innerHTML = "";
+      list.forEach((item, index) => {
+        const span = document.createElement("span");
+        span.className = "ng-tag";
+        span.textContent = item;
+        const btn = document.createElement("button");
+        btn.textContent = "×";
+        btn.title = "除外リストから外す";
+        btn.onclick = () => {
+          const updated = getNgList().filter((_, i) => i !== index);
+          saveNgList(updated);
+        };
+        span.appendChild(btn);
+        container.appendChild(span);
+      });
+    }
+
+    function addManualNg() {
+      const input = document.getElementById("newNgInput");
+      const val = input.value.trim();
+      if (!val) return;
+      const list = getNgList();
+      if (!list.includes(val)) {
+        list.push(val);
+        saveNgList(list);
+      }
+      input.value = "";
+      showToast("除外リストに追加しました");
+    }
+
+    function addNgFromCard(tag, btnElement) {
+      const list = getNgList();
+      if (!list.includes(tag)) {
+        list.push(tag);
+        saveNgList(list);
+      }
+      btnElement.textContent = "✓ 採用済み（次回から除外）";
+      btnElement.disabled = true;
+      showToast(`「${tag}」を出題済みに登録しました`);
+    }
+
+    async function generateProblems() {
+      const btn = document.getElementById("generateBtn");
+      const results = document.getElementById("resultsContainer");
+      const category = document.getElementById("category").value;
+      const count = parseInt(document.getElementById("count").value, 10);
+      const customNote = document.getElementById("customNote").value.trim();
+
+      btn.disabled = true;
+      btn.textContent = "ひらめき問題を考案＆検算中...（約10〜15秒）";
+      results.innerHTML = "";
+
+      try {
+        const response = await fetch(GAS_WEB_APP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            category: category,
+            count: count,
+            ngList: getNgList(),
+            customNote: customNote
+          })
+        });
+
+        const result = await response.json();
+        if (result.status !== "success") {
+          throw new Error(result.message || "生成エラーが発生しました");
+        }
+
+        renderProblems(result.data);
+      } catch (err) {
+        results.innerHTML = `<div class="panel" style="color:#dc2626;">エラーが発生しました：${err.message}<br>GASのURL設定やデプロイ権限（「全員」になっているか）を確認してください。</div>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "問題を生成する";
+      }
+    }
+
+    function renderProblems(problems) {
+      const container = document.getElementById("resultsContainer");
+      container.innerHTML = "";
+
+      problems.forEach((p, idx) => {
+        const card = document.createElement("div");
+        card.className = "problem-card";
+
+        const badge = document.createElement("div");
+        badge.className = "badge";
+        badge.textContent = p.category;
+
+        const title = document.createElement("h3");
+        title.className = "problem-title";
+        title.textContent = `問${idx + 1}. ${p.title}`;
+
+        const qBox = document.createElement("div");
+        qBox.className = "question-box";
+        qBox.textContent = p.question;
+
+        const hBox = document.createElement("div");
+        hBox.className = "hint-box";
+        hBox.textContent = `💡 ヒント：${p.hint}`;
+
+        const details = document.createElement("details");
+        const summary = document.createElement("summary");
+        summary.textContent = "答えと解説を見る";
+        const ansContent = document.createElement("div");
+        ansContent.className = "answer-content";
+        ansContent.textContent = `【答え】 ${p.answer}\n\n【解き方・ひらめきのポイント】\n${p.explanation}`;
+        details.appendChild(summary);
+        details.appendChild(ansContent);
+
+        const actions = document.createElement("div");
+        actions.className = "card-actions";
+
+        const copyQBtn = document.createElement("button");
+        copyQBtn.className = "btn-sub";
+        copyQBtn.textContent = "📋 問題＋ヒントをコピー";
+        copyQBtn.onclick = () => copyText(`【プラス1問】${p.title}\n${p.question}\n（ヒント：${p.hint}）`);
+
+        const copyABtn = document.createElement("button");
+        copyABtn.className = "btn-sub";
+        copyABtn.textContent = "📋 答え＋解説をコピー";
+        copyABtn.onclick = () => copyText(`【答え】${p.answer}\n【解説】\n${p.explanation}`);
+
+        const adoptBtn = document.createElement("button");
+        adoptBtn.className = "btn-sub btn-adopt";
+        adoptBtn.textContent = "✨ この問題を採用（次回から同系統を除外）";
+        adoptBtn.onclick = () => addNgFromCard(p.ngTag, adoptBtn);
+
+        actions.appendChild(copyQBtn);
+        actions.appendChild(copyABtn);
+        actions.appendChild(adoptBtn);
+
+        card.appendChild(badge);
+        card.appendChild(title);
+        card.appendChild(qBox);
+        card.appendChild(hBox);
+        card.appendChild(details);
+        card.appendChild(actions);
+        container.appendChild(card);
+      });
+    }
+
+    function copyText(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("プリント貼り付け用にコピーしました！");
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    renderNgTags();
+  </script>
+</body>
+</html>

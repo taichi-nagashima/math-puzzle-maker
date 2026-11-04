@@ -8,13 +8,18 @@
     :root {
       --primary: #2563eb;
       --primary-hover: #1d4ed8;
+      --primary-light: #eff6ff;
       --bg: #f8fafc;
       --card: #ffffff;
       --text: #1e293b;
       --subtext: #64748b;
       --border: #e2e8f0;
       --accent: #f59e0b;
-      --success: #10b981;
+      --success: #059669;
+      --success-bg: #ecfdf5;
+      --success-border: #a7f3d0;
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
     }
     * { box-sizing: border-box; }
     body {
@@ -23,10 +28,10 @@
       background: var(--bg);
       color: var(--text);
       line-height: 1.6;
-      padding: 20px 16px 60px;
+      padding: 24px 16px 80px;
     }
     .container {
-      max-width: 760px;
+      max-width: 780px;
       margin: 0 auto;
     }
     header {
@@ -34,12 +39,13 @@
       margin-bottom: 24px;
     }
     header h1 {
-      font-size: 1.4rem;
+      font-size: 1.5rem;
       margin: 0 0 6px;
       color: var(--primary);
+      letter-spacing: -0.02em;
     }
     header p {
-      font-size: 0.9rem;
+      font-size: 0.92rem;
       color: var(--subtext);
       margin: 0;
     }
@@ -47,52 +53,173 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 20px;
+      padding: 22px;
       margin-bottom: 20px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.03);
     }
     .form-group {
-      margin-bottom: 16px;
+      margin-bottom: 18px;
+    }
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
     }
     label {
       display: block;
-      font-weight: 600;
-      font-size: 0.9rem;
-      margin-bottom: 6px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: var(--text);
+    }
+    .field-hint {
+      font-size: 0.8rem;
+      color: var(--subtext);
+      margin-top: 5px;
     }
     select, input[type="text"] {
       width: 100%;
-      padding: 10px 12px;
+      padding: 11px 12px;
       border: 1px solid var(--border);
       border-radius: 8px;
       font-size: 0.95rem;
       background: #fff;
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    select:focus, input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
     }
     .row {
       display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 12px;
+      grid-template-columns: 1.8fr 1.2fr;
+      gap: 16px;
+      align-items: start;
     }
+    @media (max-width: 640px) {
+      .row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .panel {
+        padding: 16px;
+      }
+    }
+
+    /* セグメントボタン（問題数選択） */
+    .segment-group {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .segment-btn {
+      border: none;
+      background: transparent;
+      padding: 8px 4px;
+      border-radius: 7px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--subtext);
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1.2;
+    }
+    .segment-btn span.rec {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-top: 2px;
+    }
+    .segment-btn.active {
+      background: #fff;
+      color: var(--primary);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    /* クイック要望チップ */
+    .quick-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+      align-items: center;
+    }
+    .quick-chips-label {
+      font-size: 0.78rem;
+      color: var(--subtext);
+      margin-right: 2px;
+    }
+    .chip-btn {
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      color: #475569;
+      border-radius: 999px;
+      padding: 4px 11px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .chip-btn:hover {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* メイン生成ボタン */
     .btn-main {
       width: 100%;
-      padding: 14px;
+      padding: 15px;
       background: var(--primary);
       color: #fff;
-      font-size: 1rem;
+      font-size: 1.02rem;
       font-weight: 700;
       border: none;
       border-radius: 10px;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background 0.2s, transform 0.05s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
     }
     .btn-main:hover { background: var(--primary-hover); }
+    .btn-main:active { transform: translateY(1px); }
     .btn-main:disabled {
       background: #94a3b8;
       cursor: not-allowed;
     }
+
+    /* 除外リスト */
     .ng-section {
-      margin-top: 12px;
+      margin-top: 16px;
       font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+    }
+    .ng-section details {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      border-radius: 10px;
+      margin-bottom: 0;
+    }
+    .ng-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 0 6px;
     }
     .ng-tags {
       display: flex;
@@ -101,22 +228,34 @@
       margin-top: 8px;
     }
     .ng-tag {
-      background: #f1f5f9;
+      background: #fff;
       border: 1px solid #cbd5e1;
-      padding: 4px 10px;
+      padding: 4px 6px 4px 12px;
       border-radius: 999px;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       font-size: 0.8rem;
+      color: var(--text);
     }
     .ng-tag button {
       border: none;
-      background: none;
-      color: #ef4444;
+      background: transparent;
+      color: #94a3b8;
       cursor: pointer;
       font-weight: bold;
-      padding: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      transition: background 0.15s, color 0.15s;
+    }
+    .ng-tag button:hover {
+      background: #fee2e2;
+      color: var(--danger);
     }
     .add-ng-row {
       display: flex;
@@ -126,21 +265,62 @@
     .btn-sub {
       padding: 8px 14px;
       border: 1px solid var(--border);
-      background: #f8fafc;
+      background: #fff;
+      color: var(--text);
       border-radius: 8px;
       cursor: pointer;
       font-size: 0.85rem;
       font-weight: 600;
       white-space: nowrap;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
     }
-    .btn-sub:hover { background: #e2e8f0; }
+    .btn-sub:hover { background: #f1f5f9; }
+    .btn-text-danger {
+      background: none;
+      border: none;
+      color: var(--subtext);
+      font-size: 0.78rem;
+      text-decoration: underline;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .btn-text-danger:hover { color: var(--danger); }
+
+    /* 結果ツールバー */
+    .results-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 0 4px;
+      font-size: 0.85rem;
+      color: var(--subtext);
+    }
+
+    /* 問題カード */
     .problem-card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 16px;
+      padding: 22px;
+      margin-bottom: 18px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      transition: border-color 0.2s;
+    }
+    .problem-card.adopted {
+      border-color: var(--success-border);
+      background: #fcfffe;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
     }
     .badge {
       display: inline-block;
@@ -150,40 +330,85 @@
       font-weight: 700;
       padding: 3px 10px;
       border-radius: 999px;
-      margin-bottom: 8px;
+    }
+    .edit-guide {
+      font-size: 0.76rem;
+      color: var(--subtext);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
     .problem-title {
-      font-size: 1.1rem;
+      font-size: 1.12rem;
       font-weight: 700;
       margin: 0 0 12px;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+    .editable:hover {
+      background: #f8fafc;
+      outline: 1px dashed #cbd5e1;
+    }
+    .editable:focus {
+      background: #fff;
+      outline: 2px solid var(--primary);
     }
     .question-box {
       background: #f8fafc;
       border-left: 4px solid var(--primary);
-      padding: 14px;
+      padding: 14px 16px;
       border-radius: 6px;
       white-space: pre-wrap;
       margin-bottom: 12px;
       font-size: 0.96rem;
     }
-    .hint-box {
-      font-size: 0.88rem;
+    .hint-wrapper {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
       color: #b45309;
       background: #fffbeb;
+      border: 1px solid #fde68a;
       padding: 10px 12px;
-      border-radius: 6px;
-      margin-bottom: 12px;
-    }
-    details {
-      background: #f1f5f9;
-      padding: 10px 14px;
       border-radius: 8px;
       margin-bottom: 14px;
+      font-size: 0.88rem;
+    }
+    .hint-wrapper.excluded {
+      opacity: 0.5;
+      background: #f8fafc;
+      border-color: var(--border);
+      color: var(--subtext);
+      text-decoration: line-through;
+    }
+    .hint-text {
+      flex: 1;
+      padding: 1px 4px;
+      border-radius: 4px;
+    }
+    .hint-toggle-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #92400e;
+      cursor: pointer;
+      white-space: nowrap;
+      user-select: none;
+    }
+    details.answer-details {
+      background: #f1f5f9;
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 16px;
     }
     summary {
       font-weight: 700;
       cursor: pointer;
       font-size: 0.9rem;
+      user-select: none;
     }
     .answer-content {
       margin-top: 10px;
@@ -192,31 +417,150 @@
       border-top: 1px solid #cbd5e1;
       padding-top: 10px;
     }
-    .card-actions {
+    .answer-row {
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 8px;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+    .explanation-row {
+      color: #334155;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+
+    /* アクションボタン群 */
+    .card-actions-primary {
+      margin-bottom: 8px;
+    }
+    .btn-copy-adopt {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--success);
+      color: #fff;
+      border: none;
+      border-radius: 9px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-copy-adopt:hover { background: #047857; }
+    .card-actions-secondary {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
+      justify-content: space-between;
+      align-items: center;
     }
-    .btn-adopt {
-      background: #ecfdf5;
-      color: #047857;
-      border-color: #a7f3d0;
+    .copy-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
     }
+    .btn-adopt-toggle {
+      background: #f8fafc;
+      color: var(--subtext);
+      border: 1px solid var(--border);
+    }
+    .btn-adopt-toggle.is-adopted {
+      background: var(--success-bg);
+      color: var(--success);
+      border-color: var(--success-border);
+    }
+
+    /* スケルトンローディング */
+    .skeleton-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 16px;
+    }
+    .shimmer {
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+      background-size: 200% 100%;
+      animation: loading 1.4s infinite;
+      border-radius: 6px;
+    }
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .status-banner {
+      text-align: center;
+      padding: 12px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+
+    /* エラーパネル */
+    .error-panel {
+      background: var(--danger-bg);
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .error-panel h4 {
+      margin: 0 0 8px;
+      color: var(--danger);
+    }
+    .error-panel details {
+      margin-top: 12px;
+      background: #fff;
+      border: 1px solid #fca5a5;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      color: var(--text);
+    }
+
+    /* トースト通知 */
     .toast {
       position: fixed;
-      bottom: 20px;
+      bottom: 24px;
       left: 50%;
       transform: translateX(-50%);
       background: #1e293b;
       color: #fff;
-      padding: 10px 20px;
+      padding: 10px 18px;
       border-radius: 999px;
       font-size: 0.88rem;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.25s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+      z-index: 1000;
     }
-    .toast.show { opacity: 1; }
+    .toast.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .toast-undo-btn {
+      background: #334155;
+      color: #93c5fd;
+      border: 1px solid #475569;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .toast-undo-btn:hover { background: #475569; }
   </style>
 </head>
 <body>
@@ -230,41 +574,62 @@
       <div class="row">
         <div class="form-group">
           <label for="category">問題の系統</label>
-          <select id="category">
-            <option value="おまかせ（系統が被らないようにバランスよく選択）">おまかせ（系統が被らないように自動選択）</option>
+          <select id="category" onchange="updateCategoryHint()">
+            <option value="おまかせ（系統が被らないようにバランスよく選択）">おまかせ（系統が被らないよう自動選択）</option>
             <option value="視点の逆転（まともに数えず裏側から見て1回の計算で解く）">① 視点の逆転（裏側から見て即答する）</option>
             <option value="小さな数で実験・周期性の発見（少し書き出すとループや規則が見える）">② 小さな数で実験・周期性の発見</option>
             <option value="ずらしてまとめる（道や階段状の長さを寄せて簡単に計算する）">③ ずらしてまとめる（図形・長さの工夫）</option>
             <option value="直感のズレ・重なりの罠（植木算、のりしろ、時計、カレンダーなど）">④ 直感のズレ・重なりの罠</option>
             <option value="基準からのズレ・天秤推理（基準との差やくらべっこで暗算する）">⑤ 基準からのズレ・天秤推理</option>
           </select>
+          <div id="categoryHint" class="field-hint">5つの思考パターンから重ならないようにバランスよく出題します</div>
         </div>
+
         <div class="form-group">
-          <label for="count">作成する問題数</label>
-          <select id="count">
-            <option value="1">1問</option>
-            <option value="2" selected>2問</option>
-            <option value="3">3問</option>
-            <option value="5">5問</option>
-          </select>
+          <label>作成する問題数</label>
+          <input type="hidden" id="count" value="2">
+          <div class="segment-group" role="radiogroup" aria-label="作成する問題数">
+            <button type="button" class="segment-btn" data-count="1" onclick="selectCount(1)">1問</button>
+            <button type="button" class="segment-btn active" data-count="2" onclick="selectCount(2)">
+              2問<span class="rec">おすすめ</span>
+            </button>
+            <button type="button" class="segment-btn" data-count="3" onclick="selectCount(3)">3問</button>
+            <button type="button" class="segment-btn" data-count="5" onclick="selectCount(5)">5問</button>
+          </div>
         </div>
       </div>
 
       <div class="form-group">
-        <label for="customNote">ちょっとした要望（任意）</label>
+        <div class="label-row">
+          <label for="customNote">ちょっとした要望（任意）</label>
+          <button type="button" class="btn-text-danger" onclick="clearCustomNote()" style="text-decoration:none;">クリア</button>
+        </div>
         <input type="text" id="customNote" placeholder="例：お菓子や部活の話題で、少し優しめで、など（空欄でOK）">
+        <div class="quick-chips">
+          <span class="quick-chips-label">ワンタップ追加：</span>
+          <button type="button" class="chip-btn" onclick="appendChip('部活や学校行事の話題で')">＋部活・学校行事</button>
+          <button type="button" class="chip-btn" onclick="appendChip('お菓子や買い物の話題で')">＋お菓子・買い物</button>
+          <button type="button" class="chip-btn" onclick="appendChip('中1でも解ける優しめな難易度で')">＋優しめ</button>
+          <button type="button" class="chip-btn" onclick="appendChip('図を使わず文章だけで状況が浮かぶ問題で')">＋図なし・文章のみ</button>
+          <button type="button" class="chip-btn" onclick="appendChip('直感と答えがズレて驚く問題で')">＋意外なオチ</button>
+        </div>
       </div>
 
-      <button id="generateBtn" class="btn-main" onclick="generateProblems()">問題を生成する</button>
+      <button id="generateBtn" class="btn-main" onclick="generateProblems()">
+        ✨ ひらめき問題を生成する（約10〜15秒）
+      </button>
 
       <div class="ng-section">
-        <details>
-          <summary>出題済み・除外リスト（同じ系統を出さない設定）を確認・編集</summary>
-          <p style="margin: 8px 0 4px; color: var(--subtext);">ここに登録された問題と似たトリックは自動的に除外されます。</p>
+        <details id="ngDetails">
+          <summary id="ngSummary">🚫 出題済み・除外ネタの管理（現在 0 件を自動除外中）</summary>
+          <div class="ng-header-row">
+            <span style="color: var(--subtext);">登録された問題と似たトリックは自動的に除外されます。</span>
+            <button type="button" class="btn-text-danger" onclick="resetNgList()">初期状態に戻す</button>
+          </div>
           <div id="ngTagsContainer" class="ng-tags"></div>
           <div class="add-ng-row">
-            <input type="text" id="newNgInput" placeholder="除外したい過去ネタを追加（例：トーナメントの試合数）">
-            <button class="btn-sub" onclick="addManualNg()">追加</button>
+            <input type="text" id="newNgInput" placeholder="除外したい過去ネタを入力（Enterキーで追加）">
+            <button type="button" class="btn-sub" onclick="addManualNg()">＋追加</button>
           </div>
         </details>
       </div>
@@ -273,7 +638,10 @@
     <div id="resultsContainer"></div>
   </div>
 
-  <div id="toast" class="toast">コピーしました！</div>
+  <div id="toast" class="toast" role="status" aria-live="polite">
+    <span id="toastMsg">コピーしました！</span>
+    <button type="button" id="toastUndoBtn" class="toast-undo-btn" style="display:none;">元に戻す</button>
+  </div>
 
   <script>
     // ★手順2で発行したGASのウェブアプリURLをここに貼り付けてください
@@ -285,13 +653,54 @@
       "x+yからx^2+xy+y^2を求める文字式の塊変形"
     ];
 
+    const CATEGORY_HINTS = {
+      "おまかせ（系統が被らないようにバランスよく選択）": "5つの思考パターンから重ならないようにバランスよく出題します",
+      "視点の逆転（まともに数えず裏側から見て1回の計算で解く）": "例：勝ち残りではなく「負けて消える数」や「全体から引く」ことで即答する問題",
+      "小さな数で実験・周期性の発見（少し書き出すとループや規則が見える）": "例：最初の3〜4回を書き出すと規則性や周期が見つかり、大きな数でも一瞬で求まる問題",
+      "ずらしてまとめる（道や階段状の長さを寄せて簡単に計算する）": "例：バラバラに見える長さや差を端に寄せて1つにまとめる問題",
+      "直感のズレ・重なりの罠（植木算、のりしろ、時計、カレンダーなど）": "例：間の数やのりしろ、往復の罠など、うっかり1つズレやすい日常の数理問題",
+      "基準からのズレ・天秤推理（基準との差やくらべっこで暗算する）": "例：平均や仮の基準からのプラスマイナス、2つの条件の差から暗算で推理する問題"
+    };
+
+    let toastTimer = null;
+    let loadingInterval = null;
+
+    function updateCategoryHint() {
+      const select = document.getElementById("category");
+      const hintEl = document.getElementById("categoryHint");
+      hintEl.textContent = CATEGORY_HINTS[select.value] || "";
+    }
+
+    function selectCount(num) {
+      document.getElementById("count").value = String(num);
+      document.querySelectorAll(".segment-btn").forEach(btn => {
+        btn.classList.toggle("active", parseInt(btn.dataset.count, 10) === num);
+      });
+    }
+
+    function appendChip(text) {
+      const input = document.getElementById("customNote");
+      const current = input.value.trim();
+      if (current.includes(text)) return;
+      input.value = current ? `${current}、${text}` : text;
+      input.focus();
+    }
+
+    function clearCustomNote() {
+      document.getElementById("customNote").value = "";
+    }
+
     function getNgList() {
       const saved = localStorage.getItem("math_puzzle_ng_list");
       if (!saved) {
         localStorage.setItem("math_puzzle_ng_list", JSON.stringify(DEFAULT_NG_LIST));
-        return DEFAULT_NG_LIST;
+        return [...DEFAULT_NG_LIST];
       }
-      return JSON.parse(saved);
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return [...DEFAULT_NG_LIST];
+      }
     }
 
     function saveNgList(list) {
@@ -299,20 +708,41 @@
       renderNgTags();
     }
 
+    function resetNgList() {
+      saveNgList([...DEFAULT_NG_LIST]);
+      showToast("除外リストを初期状態に戻しました");
+    }
+
     function renderNgTags() {
       const container = document.getElementById("ngTagsContainer");
+      const summary = document.getElementById("ngSummary");
       const list = getNgList();
+      if (summary) {
+        summary.textContent = `🚫 出題済み・除外ネタの管理（現在 ${list.length} 件を自動除外中）`;
+      }
       container.innerHTML = "";
       list.forEach((item, index) => {
         const span = document.createElement("span");
         span.className = "ng-tag";
         span.textContent = item;
         const btn = document.createElement("button");
+        btn.type = "button";
         btn.textContent = "×";
-        btn.title = "除外リストから外す";
+        btn.title = `「${item}」を除外リストから外す`;
+        btn.setAttribute("aria-label", `${item}を削除`);
         btn.onclick = () => {
+          const removedItem = item;
           const updated = getNgList().filter((_, i) => i !== index);
           saveNgList(updated);
+          syncCardAdoptionStates();
+          showToast(`「${removedItem}」を除外リストから外しました`, () => {
+            const restored = getNgList();
+            if (!restored.includes(removedItem)) {
+              restored.push(removedItem);
+              saveNgList(restored);
+              syncCardAdoptionStates();
+            }
+          });
         };
         span.appendChild(btn);
         container.appendChild(span);
@@ -329,21 +759,119 @@
         saveNgList(list);
       }
       input.value = "";
-      showToast("除外リストに追加しました");
+      syncCardAdoptionStates();
+      showToast(`「${val}」を除外リストに追加しました`, () => {
+        saveNgList(getNgList().filter(item => item !== val));
+        syncCardAdoptionStates();
+      });
     }
 
-    function addNgFromCard(tag, btnElement) {
+    document.getElementById("newNgInput").addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.isComposing) {
+        e.preventDefault();
+        addManualNg();
+      }
+    });
+
+    function toggleNgFromCard(tag, forceAdd = false) {
+      if (!tag) return;
       const list = getNgList();
-      if (!list.includes(tag)) {
+      const exists = list.includes(tag);
+      if (forceAdd && exists) return;
+
+      if (exists && !forceAdd) {
+        const updated = list.filter(item => item !== tag);
+        saveNgList(updated);
+        syncCardAdoptionStates();
+        showToast(`「${tag}」の採用（除外登録）を解除しました`);
+      } else {
         list.push(tag);
         saveNgList(list);
+        syncCardAdoptionStates();
+        if (!forceAdd) {
+          showToast(`「${tag}」を出題済みに登録しました`, () => {
+            saveNgList(getNgList().filter(item => item !== tag));
+            syncCardAdoptionStates();
+          });
+        }
       }
-      btnElement.textContent = "✓ 採用済み（次回から除外）";
-      btnElement.disabled = true;
-      showToast(`「${tag}」を出題済みに登録しました`);
     }
 
-    async function callGasWithRetry(payload) { let lastError = null; for (let attempt = 1; attempt <= 4; attempt++) { try { if (attempt > 1) { const retryBtn = document.getElementById("generateBtn"); if (retryBtn) retryBtn.textContent = "混み合っているため再試行中...（" + attempt + "回目）"; await new Promise(resolve => setTimeout(resolve, 3000 * attempt)); } const gasUrl = GAS_WEB_APP_URL; const response = await fetch(gasUrl, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: (payload && payload.body ? payload.body : JSON.stringify(payload)) }); const helperResult = await response.json(); if (helperResult.status !== "success") { throw new Error(helperResult.message || "生成エラーが発生しました"); } return helperResult.data; } catch (err) { lastError = err; const isTransient = /currently experiencing high demand|high demand|overloaded|model is overloaded|503|429|temporarily|try again later|service unavailable|resource exhausted|quota exceeded|rate limit|too many requests|internal error|bad gateway|gateway timeout/i.test(err.message || ""); if (!isTransient || attempt === 4) throw err; } } throw lastError; } async function generateProblems() {
+    function syncCardAdoptionStates() {
+      const list = getNgList();
+      document.querySelectorAll(".problem-card").forEach(card => {
+        const tag = card.dataset.ngTag;
+        const isAdopted = tag && list.includes(tag);
+        card.classList.toggle("adopted", Boolean(isAdopted));
+        const toggleBtn = card.querySelector(".btn-adopt-toggle");
+        if (toggleBtn) {
+          toggleBtn.classList.toggle("is-adopted", Boolean(isAdopted));
+          toggleBtn.textContent = isAdopted ? "✓ 除外登録済み（クリックで解除）" : "🚫 次回から同系統を除外";
+        }
+      });
+    }
+
+    function renderLoadingSkeleton(count) {
+      const results = document.getElementById("resultsContainer");
+      const steps = [
+        "1/3 出題済みリストと照合し、被らないテーマを選定中...",
+        "2/3 2〜3分でスッキリ解ける問題文とヒントを作成中...",
+        "3/3 解答と解説に矛盾がないか検算中..."
+      ];
+      let stepIdx = 0;
+
+      let cardsHtml = `<div id="loadingBanner" class="status-banner">⏳ ${steps[0]}</div>`;
+      for (let i = 0; i < count; i++) {
+        cardsHtml += `
+          <div class="skeleton-card">
+            <div class="shimmer" style="width: 140px; height: 22px; margin-bottom: 12px; border-radius: 999px;"></div>
+            <div class="shimmer" style="width: 60%; height: 26px; margin-bottom: 14px;"></div>
+            <div class="shimmer" style="width: 100%; height: 84px; margin-bottom: 12px;"></div>
+            <div class="shimmer" style="width: 85%; height: 38px; margin-bottom: 12px;"></div>
+            <div class="shimmer" style="width: 100%; height: 68px;"></div>
+          </div>
+        `;
+      }
+      results.innerHTML = cardsHtml;
+
+      clearInterval(loadingInterval);
+      loadingInterval = setInterval(() => {
+        stepIdx = Math.min(stepIdx + 1, steps.length - 1);
+        const banner = document.getElementById("loadingBanner");
+        if (banner) banner.textContent = `⏳ ${steps[stepIdx]}`;
+      }, 4200);
+    }
+
+    async function callGasWithRetry(payload) {
+      let lastError = null;
+      for (let attempt = 1; attempt <= 4; attempt++) {
+        try {
+          if (attempt > 1) {
+            const retryBtn = document.getElementById("generateBtn");
+            if (retryBtn) retryBtn.textContent = `混み合っているため再試行中...（${attempt}回目）`;
+            await new Promise(resolve => setTimeout(resolve, 3000 * attempt));
+          }
+          const gasUrl = GAS_WEB_APP_URL;
+          const response = await fetch(gasUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: (payload && payload.body ? payload.body : JSON.stringify(payload))
+          });
+          const helperResult = await response.json();
+          if (helperResult.status !== "success") {
+            throw new Error(helperResult.message || "生成エラーが発生しました");
+          }
+          return helperResult.data;
+        } catch (err) {
+          lastError = err;
+          const isTransient = /currently experiencing high demand|high demand|overloaded|model is overloaded|503|429|temporarily|try again later|service unavailable|resource exhausted|quota exceeded|rate limit|too many requests|internal error|bad gateway|gateway timeout/i.test(err.message || "");
+          if (!isTransient || attempt === 4) throw err;
+        }
+      }
+      throw lastError;
+    }
+
+    async function generateProblems() {
       const btn = document.getElementById("generateBtn");
       const results = document.getElementById("resultsContainer");
       const category = document.getElementById("category").value;
@@ -352,7 +880,7 @@
 
       btn.disabled = true;
       btn.textContent = "ひらめき問題を考案＆検算中...（約10〜15秒）";
-      results.innerHTML = "";
+      renderLoadingSkeleton(count);
 
       try {
         const problems = await callGasWithRetry({
@@ -366,96 +894,282 @@
           })
         });
 
-        const result = { status: "success", data: problems };
-        if (result.status !== "success") {
-          throw new Error(result.message || "生成エラーが発生しました");
-        }
-
-        renderProblems(result.data);
+        clearInterval(loadingInterval);
+        renderProblems(problems);
       } catch (err) {
-        results.innerHTML = `<div class="panel" style="color:#dc2626;">エラーが発生しました：${err.message}<br>AI側が混み合っている場合はしばらく待ってから再度お試しください。それ以外の場合はGASのURL設定やデプロイ権限（「全員」になっているか）を確認してください。</div>`;
+        clearInterval(loadingInterval);
+        results.innerHTML = `
+          <div class="error-panel">
+            <h4>⚠️ 問題の生成中に通信エラーが発生しました</h4>
+            <p style="margin:0 0 12px; font-size:0.9rem;">AIサーバーが一時的に混み合っている可能性があります。数秒待ってから、もう一度「ひらめき問題を生成する」を押してお試しください。</p>
+            <button type="button" class="btn-sub" onclick="generateProblems()">🔄 もう一度試す</button>
+            <details>
+              <summary>管理者向けのエラー詳細・設定確認</summary>
+              <p style="margin:8px 0 0;">エラー内容：${escapeHtml(err.message || "不明なエラー")}<br>※何度も発生する場合は、GASのウェブアプリURL設定やデプロイ時のアクセス権限（「全員」）をご確認ください。</p>
+            </details>
+          </div>
+        `;
       } finally {
         btn.disabled = false;
-        btn.textContent = "問題を生成する";
+        btn.textContent = "✨ ひらめき問題を生成する（約10〜15秒）";
       }
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function toggleAllDetails(openState) {
+      document.querySelectorAll("details.answer-details").forEach(d => {
+        d.open = openState;
+      });
     }
 
     function renderProblems(problems) {
       const container = document.getElementById("resultsContainer");
       container.innerHTML = "";
 
-      problems.forEach((p, idx) => {
+      if (!Array.isArray(problems) || problems.length === 0) return;
+
+      const toolbar = document.createElement("div");
+      toolbar.className = "results-toolbar";
+      toolbar.innerHTML = `
+        <span>✨ ${problems.length}問を作成しました（問題文や解説はクリックして直接編集できます）</span>
+        <div>
+          <button type="button" class="btn-text-danger" style="text-decoration:none;" onclick="toggleAllDetails(true)">解説をすべて開く</button> /
+          <button type="button" class="btn-text-danger" style="text-decoration:none;" onclick="toggleAllDetails(false)">すべて閉じる</button>
+        </div>
+      `;
+      container.appendChild(toolbar);
+
+      problems.forEach((p) => {
         const card = document.createElement("div");
         card.className = "problem-card";
+        card.dataset.ngTag = p.ngTag || "";
+
+        const header = document.createElement("div");
+        header.className = "card-header";
 
         const badge = document.createElement("div");
         badge.className = "badge";
         badge.textContent = p.category;
 
+        const editGuide = document.createElement("span");
+        editGuide.className = "edit-guide";
+        editGuide.textContent = "✎ テキストをクリックして微調整可能";
+
+        header.appendChild(badge);
+        header.appendChild(editGuide);
+
         const title = document.createElement("h3");
-        title.className = "problem-title";
-        title.textContent = `問${idx + 1}. ${p.title}`;
+        title.className = "problem-title editable";
+        title.contentEditable = "true";
+        title.textContent = p.title;
 
         const qBox = document.createElement("div");
-        qBox.className = "question-box";
+        qBox.className = "question-box editable";
+        qBox.contentEditable = "true";
         qBox.textContent = p.question;
 
-        const hBox = document.createElement("div");
-        hBox.className = "hint-box";
-        hBox.textContent = `💡 ヒント：${p.hint}`;
+        const hWrapper = document.createElement("div");
+        hWrapper.className = "hint-wrapper";
+
+        const hText = document.createElement("div");
+        hText.className = "hint-text editable";
+        hText.contentEditable = "true";
+        hText.textContent = p.hint;
+
+        const hLabel = document.createElement("label");
+        hLabel.className = "hint-toggle-label";
+        const hCheck = document.createElement("input");
+        hCheck.type = "checkbox";
+        hCheck.checked = true;
+        hCheck.onchange = () => {
+          hWrapper.classList.toggle("excluded", !hCheck.checked);
+        };
+        hLabel.appendChild(hCheck);
+        hLabel.appendChild(document.createTextNode("ヒントを付ける"));
+
+        const hPrefix = document.createElement("span");
+        hPrefix.textContent = "💡 ヒント：";
+        hPrefix.style.fontWeight = "700";
+        hPrefix.style.whiteSpace = "nowrap";
+
+        hWrapper.appendChild(hPrefix);
+        hWrapper.appendChild(hText);
+        hWrapper.appendChild(hLabel);
 
         const details = document.createElement("details");
+        details.className = "answer-details";
+        details.open = true;
+
         const summary = document.createElement("summary");
-        summary.textContent = "答えと解説を見る";
+        summary.textContent = "答えと解説（検算用・クリックで開閉）";
+
         const ansContent = document.createElement("div");
         ansContent.className = "answer-content";
-        ansContent.textContent = `【答え】 ${p.answer}\n\n【解き方・ひらめきのポイント】\n${p.explanation}`;
+
+        const ansRow = document.createElement("div");
+        ansRow.className = "answer-row editable";
+        ansRow.contentEditable = "true";
+        ansRow.textContent = p.answer;
+
+        const expRow = document.createElement("div");
+        expRow.className = "explanation-row editable";
+        expRow.contentEditable = "true";
+        expRow.textContent = p.explanation;
+
+        const ansLabel = document.createElement("div");
+        ansLabel.style.fontSize = "0.8rem";
+        ansLabel.style.color = "var(--subtext)";
+        ansLabel.textContent = "【答え】";
+
+        const expLabel = document.createElement("div");
+        expLabel.style.fontSize = "0.8rem";
+        expLabel.style.color = "var(--subtext)";
+        expLabel.style.marginTop = "6px";
+        expLabel.textContent = "【解き方・ひらめきのポイント】";
+
+        ansContent.appendChild(ansLabel);
+        ansContent.appendChild(ansRow);
+        ansContent.appendChild(expLabel);
+        ansContent.appendChild(expRow);
+
         details.appendChild(summary);
         details.appendChild(ansContent);
 
-        const actions = document.createElement("div");
-        actions.className = "card-actions";
+        const getCurrentTexts = () => {
+          const curTitle = title.textContent.trim();
+          const curQ = qBox.textContent.trim();
+          const curHint = hText.textContent.trim();
+          const curAns = ansRow.textContent.trim();
+          const curExp = expRow.textContent.trim();
+          const includeHint = hCheck.checked;
+          return { curTitle, curQ, curHint, curAns, curExp, includeHint };
+        };
 
-        const copyQBtn = document.createElement("button");
-        copyQBtn.className = "btn-sub";
-        copyQBtn.textContent = "📋 問題＋ヒントをコピー";
-        copyQBtn.onclick = () => copyText(`【プラス1問】${p.title}\n${p.question}\n（ヒント：${p.hint}）`);
+        const primaryActionDiv = document.createElement("div");
+        primaryActionDiv.className = "card-actions-primary";
+
+        const copyAdoptBtn = document.createElement("button");
+        copyAdoptBtn.type = "button";
+        copyAdoptBtn.className = "btn-copy-adopt";
+        copyAdoptBtn.textContent = "📋 プリント用にコピーして採用（次回から同系統を除外）";
+        copyAdoptBtn.onclick = () => {
+          const { curTitle, curQ, curHint, includeHint } = getCurrentTexts();
+          const text = includeHint
+            ? `【プラス1問】${curTitle}\n${curQ}\n（ヒント：${curHint}）`
+            : `【プラス1問】${curTitle}\n${curQ}`;
+          const prevList = getNgList();
+          const wasAlreadyAdopted = prevList.includes(p.ngTag);
+          toggleNgFromCard(p.ngTag, true);
+          navigator.clipboard.writeText(text).then(() => {
+            showToast(
+              `問題${includeHint ? "＋ヒント" : ""}をコピーし、出題済みに登録しました！`,
+              !wasAlreadyAdopted ? () => {
+                saveNgList(getNgList().filter(item => item !== p.ngTag));
+                syncCardAdoptionStates();
+              } : null
+            );
+          });
+        };
+        primaryActionDiv.appendChild(copyAdoptBtn);
+
+        const secondaryActionDiv = document.createElement("div");
+        secondaryActionDiv.className = "card-actions-secondary";
+
+        const copyGroup = document.createElement("div");
+        copyGroup.className = "copy-group";
+
+        const copyQOnlyBtn = document.createElement("button");
+        copyQOnlyBtn.type = "button";
+        copyQOnlyBtn.className = "btn-sub";
+        copyQOnlyBtn.textContent = "📄 問題のみコピー";
+        copyQOnlyBtn.onclick = () => {
+          const { curTitle, curQ, curHint, includeHint } = getCurrentTexts();
+          const text = includeHint
+            ? `【プラス1問】${curTitle}\n${curQ}\n（ヒント：${curHint}）`
+            : `【プラス1問】${curTitle}\n${curQ}`;
+          copyText(text, `問題${includeHint ? "＋ヒント" : "のみ"}をコピーしました！`);
+        };
 
         const copyABtn = document.createElement("button");
+        copyABtn.type = "button";
         copyABtn.className = "btn-sub";
-        copyABtn.textContent = "📋 答え＋解説をコピー";
-        copyABtn.onclick = () => copyText(`【答え】${p.answer}\n【解説】\n${p.explanation}`);
+        copyABtn.textContent = "💡 答え＋解説をコピー";
+        copyABtn.onclick = () => {
+          const { curAns, curExp } = getCurrentTexts();
+          copyText(`【答え】${curAns}\n【解説】\n${curExp}`, "答え＋解説をコピーしました！");
+        };
 
-        const adoptBtn = document.createElement("button");
-        adoptBtn.className = "btn-sub btn-adopt";
-        adoptBtn.textContent = "✨ この問題を採用（次回から同系統を除外）";
-        adoptBtn.onclick = () => addNgFromCard(p.ngTag, adoptBtn);
+        const copyAllBtn = document.createElement("button");
+        copyAllBtn.type = "button";
+        copyAllBtn.className = "btn-sub";
+        copyAllBtn.textContent = "📑 問題〜解説を一括コピー";
+        copyAllBtn.onclick = () => {
+          const { curTitle, curQ, curHint, curAns, curExp, includeHint } = getCurrentTexts();
+          const qPart = includeHint
+            ? `【プラス1問】${curTitle}\n${curQ}\n（ヒント：${curHint}）`
+            : `【プラス1問】${curTitle}\n${curQ}`;
+          copyText(`${qPart}\n\n【答え】${curAns}\n【解説】\n${curExp}`, "問題から解説まで一括コピーしました！");
+        };
 
-        actions.appendChild(copyQBtn);
-        actions.appendChild(copyABtn);
-        actions.appendChild(adoptBtn);
+        copyGroup.appendChild(copyQOnlyBtn);
+        copyGroup.appendChild(copyABtn);
+        copyGroup.appendChild(copyAllBtn);
 
-        card.appendChild(badge);
+        const adoptToggleBtn = document.createElement("button");
+        adoptToggleBtn.type = "button";
+        adoptToggleBtn.className = "btn-sub btn-adopt-toggle";
+        adoptToggleBtn.textContent = "🚫 次回から同系統を除外";
+        adoptToggleBtn.onclick = () => toggleNgFromCard(p.ngTag, false);
+
+        secondaryActionDiv.appendChild(copyGroup);
+        secondaryActionDiv.appendChild(adoptToggleBtn);
+
+        card.appendChild(header);
         card.appendChild(title);
         card.appendChild(qBox);
-        card.appendChild(hBox);
+        card.appendChild(hWrapper);
         card.appendChild(details);
-        card.appendChild(actions);
+        card.appendChild(primaryActionDiv);
+        card.appendChild(secondaryActionDiv);
         container.appendChild(card);
       });
+
+      syncCardAdoptionStates();
     }
 
-    function copyText(text) {
+    function copyText(text, customMsg) {
       navigator.clipboard.writeText(text).then(() => {
-        showToast("プリント貼り付け用にコピーしました！");
+        showToast(customMsg || "プリント貼り付け用にコピーしました！");
       });
     }
 
-    function showToast(msg) {
+    function showToast(msg, undoCallback = null) {
       const toast = document.getElementById("toast");
-      toast.textContent = msg;
+      const msgEl = document.getElementById("toastMsg");
+      const undoBtn = document.getElementById("toastUndoBtn");
+
+      msgEl.textContent = msg;
+      if (typeof undoCallback === "function") {
+        undoBtn.style.display = "inline-block";
+        undoBtn.onclick = () => {
+          undoCallback();
+          toast.classList.remove("show");
+        };
+      } else {
+        undoBtn.style.display = "none";
+        undoBtn.onclick = null;
+      }
+
       toast.classList.add("show");
-      setTimeout(() => toast.classList.remove("show"), 2200);
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 3200);
     }
 
     renderNgTags();

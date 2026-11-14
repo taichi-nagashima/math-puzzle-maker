@@ -571,11 +571,25 @@
     </header>
 
     <div class="panel">
+      <div class="form-group">
+        <label>問題形式</label>
+        <input type="hidden" id="problemFormat" value="calculation">
+        <div class="segment-group" style="grid-template-columns: repeat(3, 1fr);" role="radiogroup" aria-label="問題形式">
+          <button type="button" class="segment-btn format-btn active" data-format="calculation" onclick="selectFormat('calculation')">
+            計算問題<span class="rec">数式のみ</span>
+          </button>
+          <button type="button" class="segment-btn format-btn" data-format="word" onclick="selectFormat('word')">文章題・ひらめき</button>
+          <button type="button" class="segment-btn format-btn" data-format="mixed" onclick="selectFormat('mixed')">おまかせ</button>
+        </div>
+        <div class="field-hint">「計算問題」では文章題を作らず、数式だけの純粋な計算問題を生成します</div>
+      </div>
+
       <div class="row">
         <div class="form-group">
           <label for="category">問題の系統</label>
           <select id="category" onchange="updateCategoryHint()">
             <option value="おまかせ（系統が被らないようにバランスよく選択）">おまかせ（系統が被らないよう自動選択）</option>
+            <option value="計算問題（文章題ではなく、数式のみで答える純粋な計算問題。日常の場面や物語の設定は一切使わない）">⑥ 計算問題（純粋な計算・数式のみ）</option>
             <option value="視点の逆転（まともに数えず裏側から見て1回の計算で解く）">① 視点の逆転（裏側から見て即答する）</option>
             <option value="小さな数で実験・周期性の発見（少し書き出すとループや規則が見える）">② 小さな数で実験・周期性の発見</option>
             <option value="ずらしてまとめる（道や階段状の長さを寄せて簡単に計算する）">③ ずらしてまとめる（図形・長さの工夫）</option>
@@ -647,14 +661,24 @@
     // ★手順2で発行したGASのウェブアプリURLをここに貼り付けてください
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyVnBRuWmSnW3F0JggDowRGUROb7RmX_FKxxfNTIHgNngc6-CGWDOkX3mWp4sMj7iyD/exec";
 
-    const DEFAULT_NG_LIST = [
-      "1+2+...+100のようなガウス算・ペア相殺の計算",
-      "2026×2026-2025×2027のような数の置き換え計算",
-      "x+yからx^2+xy+y^2を求める文字式の塊変形"
-    ];
+    // 除外リストの初期値は空白（空配列）。保存キーを v2 に変更し、
+    // 旧バージョンで自動登録されていた初期ネタが残らないようにしている
+    const NG_STORAGE_KEY = "math_puzzle_ng_list_v2";
+    const LEGACY_NG_STORAGE_KEY = "math_puzzle_ng_list";
+    const DEFAULT_NG_LIST = [];
+
+    const CALC_CATEGORY_VALUE = "計算問題（文章題ではなく、数式のみで答える純粋な計算問題。日常の場面や物語の設定は一切使わない）";
+
+    // 問題形式ごとの生成指示。customNote に結合して GAS 側プロンプトへ渡す
+    const FORMAT_INSTRUCTIONS = {
+      calculation: "【最優先・問題形式の指定】文章題は禁止です。全問、純粋な計算問題（数式を解く問題）にしてください。問題文は「次の計算をしなさい。」程度の最小限の指示と数式だけで構成し、日常の場面・物語・買い物・人数・速さなどの設定文や、単位のついた文章題は一切入れないでください。出題範囲は中学校数学の計算（正負の数、四則演算、分数・小数、累乗、文字式、一次方程式、平方根、式の展開・因数分解など）から選んでください。答えは数値・分数・文字式など計算結果のみとし、解説は計算の手順を簡潔に示してください。",
+      word: "【問題形式の指定】文章や日常の場面を使った、ひらめきで解ける問題にしてください。",
+      mixed: ""
+    };
 
     const CATEGORY_HINTS = {
       "おまかせ（系統が被らないようにバランスよく選択）": "5つの思考パターンから重ならないようにバランスよく出題します",
+      "計算問題（文章題ではなく、数式のみで答える純粋な計算問題。日常の場面や物語の設定は一切使わない）": "例：文章題ではなく、数式だけを解く純粋な計算問題（四則演算・文字式・方程式など）",
       "視点の逆転（まともに数えず裏側から見て1回の計算で解く）": "例：勝ち残りではなく「負けて消える数」や「全体から引く」ことで即答する問題",
       "小さな数で実験・周期性の発見（少し書き出すとループや規則が見える）": "例：最初の3〜4回を書き出すと規則性や周期が見つかり、大きな数でも一瞬で求まる問題",
       "ずらしてまとめる（道や階段状の長さを寄せて簡単に計算する）": "例：バラバラに見える長さや差を端に寄せて1つにまとめる問題",
@@ -669,6 +693,13 @@
       const select = document.getElementById("category");
       const hintEl = document.getElementById("categoryHint");
       hintEl.textContent = CATEGORY_HINTS[select.value] || "";
+    }
+
+    function selectFormat(format) {
+      document.getElementById("problemFormat").value = format;
+      document.querySelectorAll(".format-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.format === format);
+      });
     }
 
     function selectCount(num) {
@@ -691,26 +722,28 @@
     }
 
     function getNgList() {
-      const saved = localStorage.getItem("math_puzzle_ng_list");
+      // 旧キーのデータは初期値扱いにしない（移行時に一度だけ削除）
+      localStorage.removeItem(LEGACY_NG_STORAGE_KEY);
+      const saved = localStorage.getItem(NG_STORAGE_KEY);
       if (!saved) {
-        localStorage.setItem("math_puzzle_ng_list", JSON.stringify(DEFAULT_NG_LIST));
         return [...DEFAULT_NG_LIST];
       }
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        return Array.isArray(parsed) ? parsed : [...DEFAULT_NG_LIST];
       } catch (e) {
         return [...DEFAULT_NG_LIST];
       }
     }
 
     function saveNgList(list) {
-      localStorage.setItem("math_puzzle_ng_list", JSON.stringify(list));
+      localStorage.setItem(NG_STORAGE_KEY, JSON.stringify(list));
       renderNgTags();
     }
 
     function resetNgList() {
       saveNgList([...DEFAULT_NG_LIST]);
-      showToast("除外リストを初期状態に戻しました");
+      showToast("除外リストを初期状態（空白）に戻しました");
     }
 
     function renderNgTags() {
@@ -877,6 +910,16 @@
       const category = document.getElementById("category").value;
       const count = parseInt(document.getElementById("count").value, 10);
       const customNote = document.getElementById("customNote").value.trim();
+      const problemFormat = document.getElementById("problemFormat").value;
+      const formatInstruction = FORMAT_INSTRUCTIONS[problemFormat] || "";
+
+      // 計算問題モードでは、系統が「おまかせ」のままでも計算問題として出題させる
+      let effectiveCategory = category;
+      if (problemFormat === "calculation" && category.startsWith("おまかせ")) {
+        effectiveCategory = CALC_CATEGORY_VALUE;
+      }
+      // 形式の指示は GAS 側プロンプトに渡る customNote の先頭に結合して最優先で効かせる
+      const effectiveCustomNote = [formatInstruction, customNote].filter(Boolean).join(" ");
 
       btn.disabled = true;
       btn.textContent = "ひらめき問題を考案＆検算中...（約10〜15秒）";
@@ -887,10 +930,12 @@
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
-            category: category,
+            category: effectiveCategory,
             count: count,
             ngList: getNgList(),
-            customNote: customNote
+            customNote: effectiveCustomNote,
+            problemFormat: problemFormat,
+            formatInstruction: formatInstruction
           })
         });
 

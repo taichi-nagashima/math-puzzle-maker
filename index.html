@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>プリント裏の「ひらめき数学」メーカー</title>
+  <meta name="theme-color" content="#2563eb">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="ひらめき数学">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.json">
   <style>
     :root {
       --primary: #2563eb;
@@ -561,6 +569,92 @@
       cursor: pointer;
     }
     .toast-undo-btn:hover { background: #475569; }
+    .step-badge {
+      display: inline-block;
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 800;
+      border-radius: 999px;
+      padding: 1px 8px;
+      margin-right: 6px;
+      vertical-align: 2px;
+      letter-spacing: 0.04em;
+    }
+    .print-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 14px;
+      width: 100%;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+      font-size: 0.85rem;
+      color: var(--subtext);
+    }
+    .print-bar label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+    .btn-print {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-left: auto;
+    }
+    .btn-print:hover { background: var(--primary-hover); }
+    .pdf-check {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.8rem;
+      color: var(--subtext);
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    #printSheet { display: none; }
+    @page { margin: 14mm; }
+    @media print {
+      .container, .toast { display: none !important; }
+      body { background: #fff !important; }
+      #printSheet {
+        display: block;
+        color: #000;
+        font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+        line-height: 1.7;
+      }
+      .ps-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        border-bottom: 2px solid #000;
+        padding-bottom: 6px;
+        margin-bottom: 18px;
+      }
+      .ps-title { font-size: 20px; font-weight: 800; }
+      .ps-meta { font-size: 12px; white-space: nowrap; }
+      .ps-item { margin-bottom: 20px; page-break-inside: avoid; }
+      .ps-q { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
+      .ps-num {
+        display: inline-block;
+        border: 1.5px solid #000;
+        border-radius: 4px;
+        padding: 0 7px;
+        margin-right: 8px;
+        font-size: 13px;
+      }
+      .ps-body { font-size: 13.5px; white-space: pre-wrap; }
+      .ps-hint { font-size: 12px; color: #333; margin-top: 2px; }
+      .ps-space { height: 52px; border-bottom: 1px solid #bbb; margin-top: 4px; }
+      .ps-answers { page-break-before: always; }
+      .ps-answers h2 { font-size: 17px; border-bottom: 2px solid #000; padding-bottom: 4px; }
+      .ps-ans-item { margin-bottom: 14px; font-size: 13px; }
+      .ps-ans-item .ps-a { font-weight: 700; }
+      .ps-ans-item .ps-e { white-space: pre-wrap; }
+    }
   </style>
 </head>
 <body>
@@ -572,44 +666,41 @@
 
     <div class="panel">
       <div class="form-group">
-        <label>問題形式</label>
+        <label><span class="step-badge">STEP 1</span>出題タイプ</label>
         <input type="hidden" id="problemFormat" value="calculation">
-        <div class="segment-group" style="grid-template-columns: repeat(3, 1fr);" role="radiogroup" aria-label="問題形式">
+        <div class="segment-group" style="grid-template-columns: repeat(3, 1fr);" role="radiogroup" aria-label="出題タイプ">
           <button type="button" class="segment-btn format-btn active" data-format="calculation" onclick="selectFormat('calculation')">
-            計算問題<span class="rec">数式のみ</span>
+            計算トレーニング<span class="rec">数式のみの反復演習</span>
           </button>
-          <button type="button" class="segment-btn format-btn" data-format="word" onclick="selectFormat('word')">文章題・ひらめき</button>
-          <button type="button" class="segment-btn format-btn" data-format="mixed" onclick="selectFormat('mixed')">おまかせ</button>
+          <button type="button" class="segment-btn format-btn" data-format="word" onclick="selectFormat('word')">
+            思考力・文章題<span class="rec">ひらめき・応用問題</span>
+          </button>
+          <button type="button" class="segment-btn format-btn" data-format="mixed" onclick="selectFormat('mixed')">
+            ミックス<span class="rec">おまかせ出題</span>
+          </button>
         </div>
-        <div class="field-hint">「計算問題」では文章題を作らず、数式だけの純粋な計算問題を生成します</div>
+        <div class="field-hint">まず「どういうプリントを作るか」を選びます。選ぶと STEP 2 の選択肢が連動して切り替わります</div>
       </div>
 
-      <div class="row">
-        <div class="form-group">
-          <label for="category">問題の系統</label>
-          <select id="category" onchange="updateCategoryHint()">
-            <option value="おまかせ（系統が被らないようにバランスよく選択）">おまかせ（系統が被らないよう自動選択）</option>
-            <option value="計算問題（文章題ではなく、数式のみで答える純粋な計算問題。日常の場面や物語の設定は一切使わない）">⑥ 計算問題（純粋な計算・数式のみ）</option>
-            <option value="視点の逆転（まともに数えず裏側から見て1回の計算で解く）">① 視点の逆転（裏側から見て即答する）</option>
-            <option value="小さな数で実験・周期性の発見（少し書き出すとループや規則が見える）">② 小さな数で実験・周期性の発見</option>
-            <option value="ずらしてまとめる（道や階段状の長さを寄せて簡単に計算する）">③ ずらしてまとめる（図形・長さの工夫）</option>
-            <option value="直感のズレ・重なりの罠（植木算、のりしろ、時計、カレンダーなど）">④ 直感のズレ・重なりの罠</option>
-            <option value="基準からのズレ・天秤推理（基準との差やくらべっこで暗算する）">⑤ 基準からのズレ・天秤推理</option>
-          </select>
-          <div id="categoryHint" class="field-hint">5つの思考パターンから重ならないようにバランスよく出題します</div>
-        </div>
+      <div class="form-group">
+        <label for="category" id="categoryLabel"><span class="step-badge">STEP 2</span>出題する単元（計算）</label>
+        <select id="category" onchange="updateCategoryHint()"></select>
+        <div id="categoryHint" class="field-hint"></div>
+      </div>
 
-        <div class="form-group">
-          <label>作成する問題数</label>
-          <input type="hidden" id="count" value="2">
-          <div class="segment-group" role="radiogroup" aria-label="作成する問題数">
-            <button type="button" class="segment-btn" data-count="1" onclick="selectCount(1)">1問</button>
-            <button type="button" class="segment-btn active" data-count="2" onclick="selectCount(2)">
-              2問<span class="rec">おすすめ</span>
-            </button>
-            <button type="button" class="segment-btn" data-count="3" onclick="selectCount(3)">3問</button>
-            <button type="button" class="segment-btn" data-count="5" onclick="selectCount(5)">5問</button>
-          </div>
+      <div class="form-group">
+        <label><span class="step-badge">STEP 3</span>問題数</label>
+        <input type="hidden" id="count" value="5">
+        <div class="segment-group" style="grid-template-columns: repeat(3, 1fr);" role="radiogroup" aria-label="問題数">
+          <button type="button" class="segment-btn" data-count="3" onclick="selectCount(3)">
+            3問<span class="rec">導入・確認用</span>
+          </button>
+          <button type="button" class="segment-btn active" data-count="5" onclick="selectCount(5)">
+            5問<span class="rec">おすすめ・小テスト</span>
+          </button>
+          <button type="button" class="segment-btn" data-count="10" onclick="selectCount(10)">
+            10問<span class="rec">演習プリント用</span>
+          </button>
         </div>
       </div>
 
@@ -630,7 +721,7 @@
       </div>
 
       <button id="generateBtn" class="btn-main" onclick="generateProblems()">
-        ✨ ひらめき問題を生成する（約10〜15秒）
+        ✨ 問題を作成する（5問）
       </button>
 
       <div class="ng-section">
@@ -651,6 +742,8 @@
 
     <div id="resultsContainer"></div>
   </div>
+
+  <div id="printSheet" aria-hidden="true"></div>
 
   <div id="toast" class="toast" role="status" aria-live="polite">
     <span id="toastMsg">コピーしました！</span>
@@ -676,15 +769,110 @@
       mixed: ""
     };
 
-    const CATEGORY_HINTS = {
-      "おまかせ（系統が被らないようにバランスよく選択）": "5つの思考パターンから重ならないようにバランスよく出題します",
-      "計算問題（文章題ではなく、数式のみで答える純粋な計算問題。日常の場面や物語の設定は一切使わない）": "例：文章題ではなく、数式だけを解く純粋な計算問題（四則演算・文字式・方程式など）",
-      "視点の逆転（まともに数えず裏側から見て1回の計算で解く）": "例：勝ち残りではなく「負けて消える数」や「全体から引く」ことで即答する問題",
-      "小さな数で実験・周期性の発見（少し書き出すとループや規則が見える）": "例：最初の3〜4回を書き出すと規則性や周期が見つかり、大きな数でも一瞬で求まる問題",
-      "ずらしてまとめる（道や階段状の長さを寄せて簡単に計算する）": "例：バラバラに見える長さや差を端に寄せて1つにまとめる問題",
-      "直感のズレ・重なりの罠（植木算、のりしろ、時計、カレンダーなど）": "例：間の数やのりしろ、往復の罠など、うっかり1つズレやすい日常の数理問題",
-      "基準からのズレ・天秤推理（基準との差やくらべっこで暗算する）": "例：平均や仮の基準からのプラスマイナス、2つの条件の差から暗算で推理する問題"
+    // STEP 2 の選択肢は STEP 1（出題タイプ）に連動して切り替わる。
+    // value はそのまま GAS 側プロンプトへ渡る出題指示文。
+    const CATEGORY_SETS = {
+      calculation: {
+        label: "出題する単元（計算）",
+        groups: [
+          { group: null, options: [
+            { value: CALC_CATEGORY_VALUE, label: "おまかせ（全単元からバランスよく）", hint: "中学数学の計算全般から、単元が偏らないように出題します" }
+          ]},
+          { group: "中学1年", options: [
+            { value: "計算問題（中学1年「正の数・負の数」の四則計算のみ。文章題は禁止、数式のみ）", label: "正の数・負の数の四則計算", hint: "例：(-3) + 5 × (-2) のような、正負の数と四則演算の計算" },
+            { value: "計算問題（中学1年「文字式」の計算のみ。代入・一次式の加減乗除。文章題は禁止、数式のみ）", label: "文字式の計算（代入・一次式）", hint: "例：x = -2 のときの式の値、一次式の加減乗除" },
+            { value: "計算問題（中学1年「一次方程式」のみ。移項・かっこ・分数を含む。文章題は禁止、数式のみ）", label: "一次方程式（移項・かっこ・分数）", hint: "例：3(x - 2) = 7x + 4 のような一次方程式を解く計算" }
+          ]},
+          { group: "中学2年", options: [
+            { value: "計算問題（中学2年「式の計算」のみ。多項式の加減・単項式の乗除。文章題は禁止、数式のみ）", label: "式の計算（多項式・単項式）", hint: "例：多項式の加減、単項式の乗除" },
+            { value: "計算問題（中学2年「連立方程式」のみ。加減法・代入法。文章題は禁止、数式のみ）", label: "連立方程式（加減法・代入法）", hint: "例：2つの式から x, y を求める連立方程式の計算" }
+          ]},
+          { group: "中学3年", options: [
+            { value: "計算問題（中学3年「多項式の展開・因数分解」のみ。文章題は禁止、数式のみ）", label: "多項式の展開・因数分解", hint: "例：(x + 3)(x - 5) の展開、x² - 7x + 12 の因数分解" },
+            { value: "計算問題（中学3年「平方根」の計算のみ。文章題は禁止、数式のみ）", label: "平方根（ルート）の計算", hint: "例：√12 × √3、有理化を含む平方根の計算" },
+            { value: "計算問題（中学3年「二次方程式」のみ。因数分解・解の公式。文章題は禁止、数式のみ）", label: "二次方程式（因数分解・解の公式）", hint: "例：x² - 5x + 6 = 0 のような二次方程式を解く計算" }
+          ]}
+        ]
+      },
+      word: {
+        label: "鍛えたい思考パターン",
+        groups: [
+          { group: null, options: [
+            { value: "おまかせ（系統が被らないようにバランスよく選択）", label: "おまかせ（全パターンからバランスよく）", hint: "5つの思考パターンから重ならないようにバランスよく出題します" }
+          ]},
+          { group: "① 視点の逆転", options: [
+            { value: "視点の逆転（余事象・引き算の発想：全体から不要な部分を引くことで1回の計算で解く）", label: "余事象・引き算の発想", hint: "例：まともに数えず「全体から不要な部分を引く」ことで即答する問題" },
+            { value: "視点の逆転（逆算・ゴールから辿る：操作を逆に辿って元の数を求める）", label: "逆算・ゴールから辿る", hint: "例：結果から操作を逆にたどって、はじめの数を求める問題" }
+          ]},
+          { group: "② 小さな数で実験・周期性", options: [
+            { value: "小さな数で実験・周期性の発見（規則性・周期：カレンダー・曜日・繰り返す数列や図形）", label: "規則性・周期の発見", hint: "例：カレンダーや繰り返す数列の周期を見つけて大きな数でも一瞬で求まる問題" },
+            { value: "小さな数で実験・周期性の発見（書き出しと一般化：小さい数で試して法則・文字式を見つける）", label: "書き出しと一般化", hint: "例：最初の3〜4回を書き出すと法則が見え、文字式で表せる問題" }
+          ]},
+          { group: "③ ずらしてまとめる", options: [
+            { value: "ずらしてまとめる（図形の移動・等積変形：バラバラの面積や長さを寄せて求める）", label: "図形の移動・等積変形", hint: "例：バラバラに見える面積や長さを端に寄せて1つにまとめる問題" },
+            { value: "ずらしてまとめる（計算の工夫・ペア作り：ガウス算など組み合わせを変えて暗算する）", label: "計算の工夫・ペア作り", hint: "例：1から100までの和をペアにして一瞬で求めるような工夫の問題" }
+          ]},
+          { group: "④ 直感のズレ・重なりの罠", options: [
+            { value: "直感のズレ・重なりの罠（重なり・ベン図の整理：重複を二重に数えない集合や長さの問題）", label: "重なり・ベン図の整理", hint: "例：のりしろや重なった部分を二重に数えてしまう罠の問題" },
+            { value: "直感のズレ・重なりの罠（割合・速さの落とし穴：往復の平均速度・増減率の勘違いなど）", label: "割合・速さの落とし穴", hint: "例：往復の平均速度や「増えてから減る」割合の勘違いを突く問題" }
+          ]},
+          { group: "⑤ 基準からのズレ・天秤推理", options: [
+            { value: "基準からのズレ・天秤推理（仮平均・基準との差：基準値からのプラスマイナスで平均や合計を出す）", label: "仮平均・基準との差", hint: "例：仮の基準からのズレを集めて平均や合計を暗算で出す問題" },
+            { value: "基準からのズレ・天秤推理（つり合い・条件推理：天秤・消去算・条件の絞り込みパズル）", label: "つり合い・条件推理", hint: "例：2つの条件の差や天秤のつり合いから推理する問題" }
+          ]}
+        ]
+      },
+      mixed: {
+        label: "単元・テーマ（ミックスでは自動）",
+        groups: [
+          { group: null, options: [
+            { value: "おまかせ（系統が被らないようにバランスよく選択）", label: "ミックス（全範囲からバランスよく出題）", hint: "計算と思考力をバランスよく出題します" }
+          ]}
+        ]
+      }
     };
+
+    const CATEGORY_HINTS = {};
+    Object.values(CATEGORY_SETS).forEach(set => {
+      set.groups.forEach(g => g.options.forEach(o => { if (!(o.value in CATEGORY_HINTS)) CATEGORY_HINTS[o.value] = o.hint; }));
+    });
+
+    function rebuildCategories(format) {
+      const select = document.getElementById("category");
+      const label = document.getElementById("categoryLabel");
+      const set = CATEGORY_SETS[format] || CATEGORY_SETS.mixed;
+      label.innerHTML = '<span class="step-badge">STEP 2</span>' + set.label;
+      select.innerHTML = "";
+      set.groups.forEach(g => {
+        const addOption = (parent) => {
+          g.options.forEach(o => {
+            const opt = document.createElement("option");
+            opt.value = o.value;
+            opt.textContent = o.label;
+            parent.appendChild(opt);
+          });
+        };
+        if (g.group) {
+          const og = document.createElement("optgroup");
+          og.label = g.group;
+          addOption(og);
+          select.appendChild(og);
+        } else {
+          addOption(select);
+        }
+      });
+      select.disabled = (format === "mixed");
+      updateCategoryHint();
+      if (format === "mixed") {
+        document.getElementById("categoryHint").textContent = "計算と思考力をバランスよく出題します";
+      }
+    }
+
+    function updateGenerateBtnLabel() {
+      const btn = document.getElementById("generateBtn");
+      const count = document.getElementById("count").value;
+      btn.textContent = `✨ 問題を作成する（${count}問）`;
+    }
 
     let toastTimer = null;
     let loadingInterval = null;
@@ -700,6 +888,7 @@
       document.querySelectorAll(".format-btn").forEach(btn => {
         btn.classList.toggle("active", btn.dataset.format === format);
       });
+      rebuildCategories(format);
     }
 
     function selectCount(num) {
@@ -707,6 +896,7 @@
       document.querySelectorAll(".segment-btn").forEach(btn => {
         btn.classList.toggle("active", parseInt(btn.dataset.count, 10) === num);
       });
+      updateGenerateBtnLabel();
     }
 
     function appendChip(text) {
@@ -922,7 +1112,7 @@
       const effectiveCustomNote = [formatInstruction, customNote].filter(Boolean).join(" ");
 
       btn.disabled = true;
-      btn.textContent = "ひらめき問題を考案＆検算中...（約10〜15秒）";
+      btn.textContent = count >= 10 ? "ひらめき問題を考案＆検算中...（10問は30秒ほどかかります）" : "ひらめき問題を考案＆検算中...（約10〜15秒）";
       renderLoadingSkeleton(count);
 
       try {
@@ -956,7 +1146,7 @@
         `;
       } finally {
         btn.disabled = false;
-        btn.textContent = "✨ ひらめき問題を生成する（約10〜15秒）";
+        updateGenerateBtnLabel();
       }
     }
 
@@ -988,6 +1178,14 @@
           <button type="button" class="btn-text-danger" style="text-decoration:none;" onclick="toggleAllDetails(true)">解説をすべて開く</button> /
           <button type="button" class="btn-text-danger" style="text-decoration:none;" onclick="toggleAllDetails(false)">すべて閉じる</button>
         </div>
+        <div class="print-bar">
+          <span>🖨 PDF用：</span>
+          <label><input type="checkbox" id="printAnswers" checked> 解答・解説を別ページに付ける</label>
+          <label><input type="checkbox" id="printName" checked> 氏名欄を付ける</label>
+          <button type="button" class="btn-sub" onclick="toggleAllPdfSelect(true)">すべて選択</button>
+          <button type="button" class="btn-sub" onclick="toggleAllPdfSelect(false)">すべて解除</button>
+          <button type="button" class="btn-print" onclick="printSelectedProblems()">🖨 選択した問題をPDFにする</button>
+        </div>
       `;
       container.appendChild(toolbar);
 
@@ -1009,6 +1207,16 @@
 
         header.appendChild(badge);
         header.appendChild(editGuide);
+
+        const pdfLabel = document.createElement("label");
+        pdfLabel.className = "pdf-check";
+        const pdfCheck = document.createElement("input");
+        pdfCheck.type = "checkbox";
+        pdfCheck.className = "pdf-select";
+        pdfCheck.checked = true;
+        pdfLabel.appendChild(pdfCheck);
+        pdfLabel.appendChild(document.createTextNode("PDFに入れる"));
+        header.appendChild(pdfLabel);
 
         const title = document.createElement("h3");
         title.className = "problem-title editable";
@@ -1217,6 +1425,59 @@
       toastTimer = setTimeout(() => toast.classList.remove("show"), 3200);
     }
 
+    function toggleAllPdfSelect(on) {
+      document.querySelectorAll(".pdf-select").forEach(cb => { cb.checked = on; });
+    }
+
+    function cardText(card, selector) {
+      const el = card.querySelector(selector);
+      if (!el) return "";
+      return (el.innerText || el.textContent || "").trim();
+    }
+
+    function printSelectedProblems() {
+      const cards = Array.from(document.querySelectorAll(".problem-card"))
+        .filter(c => { const cb = c.querySelector(".pdf-select"); return cb && cb.checked; });
+      if (cards.length === 0) {
+        showToast("PDFに入れる問題が選択されていません");
+        return;
+      }
+      const withAnswers = document.getElementById("printAnswers")?.checked !== false;
+      const withName = document.getElementById("printName")?.checked !== false;
+      const today = new Date();
+      const dateStr = `${today.getFullYear()}/${today.getMonth() + 1}/${today.getDate()}`;
+      const items = cards.map(card => {
+        const hintWrap = card.querySelector(".hint-wrapper");
+        const hintOn = hintWrap && !hintWrap.classList.contains("excluded");
+        return {
+          title: cardText(card, ".problem-title"),
+          question: cardText(card, ".question-box"),
+          hint: hintOn ? cardText(card, ".hint-text") : "",
+          answer: cardText(card, ".answer-row"),
+          explanation: cardText(card, ".explanation-row")
+        };
+      });
+      let html = `<div class="ps-head"><div class="ps-title">ひらめき数学プリント</div><div class="ps-meta">${dateStr}${withName ? "　名前：＿＿＿＿＿＿＿＿＿＿" : ""}</div></div>`;
+      items.forEach((it, i) => {
+        html += `<div class="ps-item"><div class="ps-q"><span class="ps-num">問${i + 1}</span>${escapeHtml(it.title)}</div>`
+          + `<div class="ps-body">${escapeHtml(it.question)}</div>`
+          + (it.hint ? `<div class="ps-hint">💡 ヒント：${escapeHtml(it.hint)}</div>` : "")
+          + `<div class="ps-space"></div></div>`;
+      });
+      if (withAnswers) {
+        html += `<div class="ps-answers"><h2>解答・解説</h2>`;
+        items.forEach((it, i) => {
+          html += `<div class="ps-ans-item"><span class="ps-a">問${i + 1}【答え】${escapeHtml(it.answer)}</span><div class="ps-e">${escapeHtml(it.explanation)}</div></div>`;
+        });
+        html += `</div>`;
+      }
+      document.getElementById("printSheet").innerHTML = html;
+      showToast("印刷画面が開きます。「PDFとして保存」を選んでください");
+      setTimeout(() => window.print(), 150);
+    }
+
+    rebuildCategories(document.getElementById("problemFormat").value);
+    updateGenerateBtnLabel();
     renderNgTags();
   </script>
 </body>

@@ -602,6 +602,8 @@
       color: var(--subtext);
     }
     .print-bar label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+    #printBar[hidden] { display: none; }
+    .run-section { margin-top: 22px; }
     .btn-print {
       background: var(--primary);
       color: #fff;
@@ -624,11 +626,12 @@
       cursor: pointer;
     }
     #printSheet { display: none; }
-    @page { margin: 14mm; }
+    @page { size: 182mm 257mm; margin: 10mm; }
     @media print {
       .container, .toast { display: none !important; }
       body { background: #fff !important; }
       #printSheet { display: block; }
+      #printSheet .pdf-page { page-break-after: always; zoom: 0.94; }
     }
     #printSheet, #pdfSheet {
       color: #000;
@@ -639,16 +642,20 @@
       position: fixed;
       left: -10000px;
       top: 0;
-      width: 794px;
+      width: 688px;
       background: #fff;
       z-index: -1;
     }
-    #pdfSheet .pdf-page {
-      width: 794px;
-      min-height: 1123px;
-      padding: 56px;
+    .pdf-page {
+      width: 688px;
+      height: 972px;
+      padding: 42px 46px 40px;
       box-sizing: border-box;
       background: #fff;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
     .btn-print:disabled { opacity: 0.6; }
     .pdf-ready[hidden] { display: none; }
@@ -683,32 +690,43 @@
     }
       .ps-head {
         display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        border-bottom: 2px solid #000;
-        padding-bottom: 6px;
-        margin-bottom: 18px;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 30px;
       }
-      .ps-title { font-size: 20px; font-weight: 800; }
-      .ps-meta { font-size: 12px; white-space: nowrap; }
-      .ps-item { margin-bottom: 20px; page-break-inside: avoid; }
-      .ps-q { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
-      .ps-num {
-        display: inline-block;
-        border: 1.5px solid #000;
-        border-radius: 4px;
-        padding: 0 7px;
-        margin-right: 8px;
-        font-size: 13px;
+      .ps-title {
+        font-family: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif;
+        font-size: 25px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        white-space: nowrap;
       }
-      .ps-body { font-size: 13.5px; white-space: pre-wrap; }
-      .ps-hint { font-size: 12px; color: #333; margin-top: 2px; }
-      .ps-space { height: 52px; border-bottom: 1px solid #bbb; margin-top: 4px; }
-      .ps-answers { page-break-before: always; }
-      .ps-answers h2 { font-size: 17px; border-bottom: 2px solid #000; padding-bottom: 4px; }
-      .ps-ans-item { margin-bottom: 14px; font-size: 13px; }
-      .ps-ans-item .ps-a { font-weight: 700; }
-      .ps-ans-item .ps-e { white-space: pre-wrap; }
+      .ps-items { flex: 1; display: flex; flex-direction: column; }
+      .ps-item {
+        flex: 1 1 auto;
+        min-height: 0;
+        font-family: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif;
+      }
+      .ps-line { font-size: 17px; line-height: 1.65; }
+      .ps-num { margin-right: 10px; }
+      .ps-qtext { white-space: pre-wrap; }
+      .ps-hint {
+        font-size: 12.5px;
+        color: #333;
+        margin-top: 4px;
+        font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      }
+      .ps-answers-foot {
+        position: absolute;
+        right: 46px;
+        bottom: 34px;
+        max-width: 570px;
+        transform: rotate(180deg);
+        font-family: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif;
+        font-size: 12px;
+        line-height: 1.5;
+      }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -796,6 +814,20 @@
       </div>
     </div>
 
+    <div id="printBar" class="results-toolbar" hidden>
+      <span id="pickCount">選択中：0問</span>
+      <div>
+        <button type="button" class="btn-text-danger" style="text-decoration:none;" onclick="toggleAllDetails(true)">解説をすべて開く</button> /
+        <button type="button" class="btn-text-danger" style="text-decoration:none;" onclick="toggleAllDetails(false)">すべて閉じる</button>
+      </div>
+      <div class="print-bar">
+        <span>🖨 PDF用：</span>
+        <button type="button" class="btn-sub" onclick="toggleAllPdfSelect(true)">すべて選択</button>
+        <button type="button" class="btn-sub" onclick="toggleAllPdfSelect(false)">すべて解除</button>
+        <button type="button" class="btn-sub" onclick="clearAllResults()">結果をすべて消す</button>
+        <button type="button" class="btn-print" id="btnMakePdf" onclick="printSelectedProblems()">🖨 選択した問題をPDFにする</button>
+      </div>
+    </div>
     <div id="resultsContainer"></div>
   </div>
 
@@ -817,6 +849,7 @@
 
     // 除外リストの初期値は空白（空配列）。保存キーを v2 に変更し、
     // 旧バージョンで自動登録されていた初期ネタが残らないようにしている
+    let runSeq = 0;
     const NG_STORAGE_KEY = "math_puzzle_ng_list_v2";
     const LEGACY_NG_STORAGE_KEY = "math_puzzle_ng_list";
     const DEFAULT_NG_LIST = [];
@@ -1116,7 +1149,10 @@
           </div>
         `;
       }
-      results.innerHTML = cardsHtml;
+      const loadingSec = document.createElement("div");
+      loadingSec.id = "loadingSection";
+      loadingSec.innerHTML = cardsHtml;
+      results.appendChild(loadingSec);
 
       clearInterval(loadingInterval);
       loadingInterval = setInterval(() => {
@@ -1194,7 +1230,7 @@
         renderProblems(problems);
       } catch (err) {
         clearInterval(loadingInterval);
-        results.innerHTML = `
+        (document.getElementById("loadingSection") || results).innerHTML = `
           <div class="error-panel">
             <h4>⚠️ 問題の生成中に通信エラーが発生しました</h4>
             <p style="margin:0 0 12px; font-size:0.9rem;">AIサーバーが一時的に混み合っている可能性があります。数秒待ってから、もう一度「ひらめき問題を生成する」を押してお試しください。</p>
@@ -1227,28 +1263,21 @@
 
     function renderProblems(problems) {
       const container = document.getElementById("resultsContainer");
-      container.innerHTML = "";
+      document.getElementById("loadingSection")?.remove();
 
       if (!Array.isArray(problems) || problems.length === 0) return;
 
-      const toolbar = document.createElement("div");
-      toolbar.className = "results-toolbar";
-      toolbar.innerHTML = `
-        <span>✨ ${problems.length}問を作成しました（問題文や解説はクリックして直接編集できます）</span>
-        <div>
-          <button type="button" class="btn-text-danger" style="text-decoration:none;" onclick="toggleAllDetails(true)">解説をすべて開く</button> /
-          <button type="button" class="btn-text-danger" style="text-decoration:none;" onclick="toggleAllDetails(false)">すべて閉じる</button>
-        </div>
-        <div class="print-bar">
-          <span>🖨 PDF用：</span>
-          <label><input type="checkbox" id="printAnswers" checked> 解答・解説を別ページに付ける</label>
-          <label><input type="checkbox" id="printName" checked> 氏名欄を付ける</label>
-          <button type="button" class="btn-sub" onclick="toggleAllPdfSelect(true)">すべて選択</button>
-          <button type="button" class="btn-sub" onclick="toggleAllPdfSelect(false)">すべて解除</button>
-          <button type="button" class="btn-print" onclick="printSelectedProblems()">🖨 選択した問題をPDFにする</button>
-        </div>
-      `;
-      container.appendChild(toolbar);
+      runSeq += 1;
+      const printBar = document.getElementById("printBar");
+      if (printBar) printBar.hidden = false;
+
+      const section = document.createElement("div");
+      section.className = "run-section";
+      const secHead = document.createElement("div");
+      secHead.className = "results-toolbar";
+      secHead.innerHTML = `<span>✨ ${runSeq}回目の生成：${problems.length}問を作成しました（問題文や解説はクリックして直接編集できます）</span>`;
+      section.appendChild(secHead);
+      container.appendChild(section);
 
       problems.forEach((p) => {
         const card = document.createElement("div");
@@ -1452,10 +1481,11 @@
         card.appendChild(details);
         card.appendChild(primaryActionDiv);
         card.appendChild(secondaryActionDiv);
-        container.appendChild(card);
+        section.appendChild(card);
       });
 
       syncCardAdoptionStates();
+      updatePickCount();
     }
 
     function copyText(text, customMsg) {
@@ -1488,6 +1518,7 @@
 
     function toggleAllPdfSelect(on) {
       document.querySelectorAll(".pdf-select").forEach(cb => { cb.checked = on; });
+      updatePickCount();
     }
 
     function cardText(card, selector) {
@@ -1513,130 +1544,177 @@
     });
     }
 
-    function sheetHeadHtml(withName) {
-    const today = new Date();
-    const dateStr = `${today.getFullYear()}/${today.getMonth() + 1}/${today.getDate()}`;
-    return `<div class="ps-head"><div class="ps-title">ひらめき数学プリント</div><div class="ps-meta">${dateStr}${withName? "　名前：＿＿＿＿＿＿＿＿＿＿": ""}</div></div>`;
-    }
+function updatePickCount() {
+const n = document.querySelectorAll(".pdf-select:checked").length;
+const el = document.getElementById("pickCount");
+if (el) el.textContent = `選択中：${n}問`;
+const btn = document.getElementById("btnMakePdf");
+if (btn) btn.disabled = n === 0;
+}
 
-    function problemHtml(it, i) {
-    return `<div class="ps-item"><div class="ps-q"><span class="ps-num">問${i + 1}</span>${escapeHtml(it.title)}</div>`
-    + `<div class="ps-body">${escapeHtml(it.question)}</div>`
-    + (it.hint? `<div class="ps-hint">💡 ヒント：${escapeHtml(it.hint)}</div>`: "")
-    + `<div class="ps-space"></div></div>`;
-    }
+function clearAllResults() {
+document.getElementById("resultsContainer").innerHTML = "";
+runSeq = 0;
+const printBar = document.getElementById("printBar");
+if (printBar) printBar.hidden = true;
+updatePickCount();
+}
 
-    function answerHtml(it, i) {
-    return `<div class="ps-ans-item"><span class="ps-a">問${i + 1}${escapeHtml(it.answer)}</span><div class="ps-e">${escapeHtml(it.explanation)}</div></div>`;
-    }
+function stripAnswerPrefix(a) {
+return String(a || "").replace(/^\s*?\s*[:：]?\s*/, "").trim();
+}
 
-    function buildSheetHtml(items, withAnswers, withName) {
-    let html = sheetHeadHtml(withName);
-    items.forEach((it, i) => { html += problemHtml(it, i);});
-    if (withAnswers) {
-    html += `<div class="ps-answers"><h2>解答・解説</h2>`;
-    items.forEach((it, i) => { html += answerHtml(it, i);});
-    html += `</div>`;
-    }
-    return html;
-    }
+const SHEET_ICON_CALC = `<svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="1.5" y="1.5" width="27" height="27" fill="none" stroke="#000" stroke-width="2.4"/><path d="M15 2v26M2 15h26" stroke="#000" stroke-width="2"/><text x="8.2" y="12.8" font-size="10" text-anchor="middle" font-family="serif" font-weight="700">+</text><text x="21.8" y="12.8" font-size="10" text-anchor="middle" font-family="serif" font-weight="700">−</text><text x="8.2" y="25.8" font-size="10" text-anchor="middle" font-family="serif" font-weight="700">×</text><text x="21.8" y="25.8" font-size="10" text-anchor="middle" font-family="serif" font-weight="700">÷</text></svg>`;
+const SHEET_ICON_PEOPLE = `<svg width="42" height="30" viewBox="0 0 42 30" aria-hidden="true"><circle cx="10" cy="10" r="4.6" fill="#000"/><path d="M2.5 26c0-5 3.4-7.6 7.5-7.6s7.5 2.6 7.5 7.6z" fill="#000"/><circle cx="22" cy="12.5" r="3.8" fill="#000"/><path d="M15.5 26c.3-4 3-6 6.5-6s6.2 2 6.5 6z" fill="#000"/><rect x="29" y="1" width="12" height="12" fill="#000"/><text x="35" y="11.2" font-size="10" text-anchor="middle" fill="#fff" font-family="serif" font-weight="700">?</text></svg>`;
 
-    function printViaBrowser(items, withAnswers, withName) {
-    document.getElementById("printSheet").innerHTML = buildSheetHtml(items, withAnswers, withName);
-    showToast("印刷画面が開きます。「PDFとして保存」を選んでください");
-    setTimeout(() => window.print(), 150);
-    }
+function sheetHeadHtml() {
+return `<div class="ps-head">${SHEET_ICON_CALC}<div class="ps-title">計算力チェック</div>${SHEET_ICON_PEOPLE}</div>`;
+}
 
-    function showPdfLink(blob) {
-    const url = URL.createObjectURL(blob);
-    document.getElementById("pdfOpenLink").href = url;
-    document.getElementById("pdfReady").hidden = false;
-    showToast("PDFができました");
-    }
+function problemHtml(it, i) {
+return `<div class="ps-item"><div class="ps-line"><span class="ps-num">(${i + 1})</span><span class="ps-qtext">${escapeHtml(it.question)}</span></div>`
++ (it.hint? `<div class="ps-hint">💡 ヒント：${escapeHtml(it.hint)}</div>`: "")
++ `</div>`;
+}
 
-    async function generatePdf(items, withAnswers, withName) {
-    const btn = document.querySelector(".btn-print");
-    const origLabel = btn? btn.textContent: "";
-    if (btn) { btn.disabled = true; btn.textContent = "PDFを作成中…";}
-    const host = document.getElementById("pdfSheet");
-    try {
-    host.innerHTML = "";
-    const PAGE_H = 1123;
-    let page = null;
-    const mkPage = () => {
-    page = document.createElement("div");
-    page.className = "pdf-page";
-    host.appendChild(page);
-    return page;
-    };
-    const addFlow = (el) => {
-    page.appendChild(el);
-    if (page.scrollHeight > PAGE_H && page.childElementCount > 1) {
-    page.removeChild(el);
-    mkPage();
-    page.appendChild(el);
-    }
-    };
-    const wrap = (html) => {
-    const d = document.createElement("div");
-    d.innerHTML = html;
-    return d.firstElementChild;
-    };
-    mkPage();
-    page.appendChild(wrap(sheetHeadHtml(withName)));
-    items.forEach((it, i) => { addFlow(wrap(problemHtml(it, i)));});
-    if (withAnswers) {
-    mkPage();
-    page.appendChild(wrap(`<div class="ps-answers"><h2>解答・解説</h2></div>`));
-    items.forEach((it, i) => { addFlow(wrap(answerHtml(it, i)));});
-    }
-    const { jsPDF} = window.jspdf;
-    const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait"});
-    const pageEls = Array.from(host.querySelectorAll(".pdf-page"));
-    for (let i = 0; i < pageEls.length; i++) {
-    const canvas = await html2canvas(pageEls[i], { scale: 2, backgroundColor: "#ffffff", logging: false});
-    if (i > 0) pdf.addPage();
-    pdf.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, 210, 297);
-    }
-    const blob = pdf.output("blob");
-    const file = new File([blob], "ひらめき数学プリント.pdf", { type: "application/pdf"});
-    if (navigator.canShare && navigator.canShare({ files: [file]})) {
-    try {
-    await navigator.share({ files: [file], title: "ひらめき数学プリント"});
-    showToast("PDFを共有しました");
-    } catch (err) {
-    if (!err || err.name!== "AbortError") showPdfLink(blob);
-    }
-    } else {
-    showPdfLink(blob);
-    }
-    } catch (err) {
-    console.error(err);
-    showToast("PDFの作成に失敗したため、印刷方式で開きます");
-    printViaBrowser(items, withAnswers, withName);
-    } finally {
-    if (btn) { btn.disabled = false; btn.textContent = origLabel;}
-    host.innerHTML = "";
-    }
-    }
+function answersFootHtml(pageItems) {
+const parts = pageItems.map((it, i) => `(${i + 1}) ${escapeHtml(stripAnswerPrefix(it.answer))}`);
+return `<div class="ps-answers-foot">${parts.join("　")}</div>`;
+}
 
-    async function printSelectedProblems() {
-    const items = collectSelectedItems();
-    if (!items) {
-    showToast("PDFに入れる問題が選択されていません");
-    return;
-    }
-    const withAnswers = document.getElementById("printAnswers")?.checked!== false;
-    const withName = document.getElementById("printName")?.checked!== false;
-    if (window.html2canvas && window.jspdf) {
-    await generatePdf(items, withAnswers, withName);
-    } else {
-    printViaBrowser(items, withAnswers, withName);
-    }
-    }
+function pageHtml(pageItems) {
+return sheetHeadHtml()
++ `<div class="ps-items">` + pageItems.map((it, i) => problemHtml(it, i)).join("") + `</div>`
++ answersFootHtml(pageItems);
+}
+
+// B5シート（182×257mm = 688×972px @96dpi）のレイアウト定数
+const SHEET_PAGE_H = 972, SHEET_PAD_V = 82, SHEET_HEAD_H = 70, SHEET_FOOT_H = 44, SHEET_MAX_PER_PAGE = 4;
+
+function paginateItems(measureHost, items) {
+const probe = document.createElement("div");
+probe.className = "pdf-page";
+probe.style.height = "auto";
+probe.innerHTML = sheetHeadHtml() + `<div class="ps-items"></div>`;
+measureHost.appendChild(probe);
+const itemsBox = probe.querySelector(".ps-items");
+const heights = items.map((it, i) => {
+const d = document.createElement("div");
+d.innerHTML = problemHtml(it, i);
+const el = d.firstElementChild;
+el.style.flex = "none";
+itemsBox.appendChild(el);
+const h = el.offsetHeight;
+el.remove();
+return h;
+});
+probe.remove();
+const areaH = SHEET_PAGE_H - SHEET_PAD_V - SHEET_HEAD_H - SHEET_FOOT_H;
+const pages = [];
+let cur = [], curH = 0;
+items.forEach((it, i) => {
+const h = heights[i];
+if (cur.length > 0 && (cur.length >= SHEET_MAX_PER_PAGE || curH + h > areaH)) {
+pages.push(cur); cur = []; curH = 0;
+}
+cur.push(it); curH += h;
+});
+if (cur.length) pages.push(cur);
+return pages;
+}
+
+function buildPageEls(host, items) {
+const pages = paginateItems(host, items);
+return pages.map(pageItems => {
+const page = document.createElement("div");
+page.className = "pdf-page";
+page.innerHTML = pageHtml(pageItems);
+host.appendChild(page);
+return page;
+});
+}
+
+function printViaBrowser(items) {
+const measureHost = document.getElementById("pdfSheet");
+measureHost.innerHTML = "";
+const pages = paginateItems(measureHost, items);
+measureHost.innerHTML = "";
+const host = document.getElementById("printSheet");
+host.innerHTML = "";
+pages.forEach(pageItems => {
+const page = document.createElement("div");
+page.className = "pdf-page";
+page.innerHTML = pageHtml(pageItems);
+host.appendChild(page);
+});
+showToast("印刷画面が開きます。「PDFとして保存」を選んでください");
+setTimeout(() => window.print(), 150);
+}
+
+function showPdfLink(blob) {
+const url = URL.createObjectURL(blob);
+document.getElementById("pdfOpenLink").href = url;
+document.getElementById("pdfReady").hidden = false;
+showToast("PDFができました");
+}
+
+async function generatePdf(items) {
+const btn = document.getElementById("btnMakePdf");
+const origLabel = btn? btn.textContent: "";
+if (btn) { btn.disabled = true; btn.textContent = "PDFを作成中…";}
+const host = document.getElementById("pdfSheet");
+try {
+host.innerHTML = "";
+const pageEls = buildPageEls(host, items);
+const { jsPDF} = window.jspdf;
+const pdf = new jsPDF({ unit: "mm", format: [182, 257], orientation: "portrait"});
+for (let i = 0; i < pageEls.length; i++) {
+const canvas = await html2canvas(pageEls[i], { scale: 2, backgroundColor: "#ffffff", logging: false});
+if (i > 0) pdf.addPage([182, 257], "portrait");
+pdf.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, 182, 257);
+}
+const blob = pdf.output("blob");
+const file = new File([blob], "計算力チェック.pdf", { type: "application/pdf"});
+if (navigator.canShare && navigator.canShare({ files: [file]})) {
+try {
+await navigator.share({ files: [file], title: "計算力チェック"});
+showToast("PDFを共有しました");
+} catch (err) {
+if (!err || err.name!== "AbortError") showPdfLink(blob);
+}
+} else {
+showPdfLink(blob);
+}
+} catch (err) {
+console.error(err);
+showToast("PDFの作成に失敗したため、印刷方式で開きます");
+printViaBrowser(items);
+} finally {
+if (btn) { btn.textContent = origLabel;}
+host.innerHTML = "";
+updatePickCount();
+}
+}
+
+async function printSelectedProblems() {
+const items = collectSelectedItems();
+if (!items) {
+showToast("PDFに入れる問題が選択されていません");
+return;
+}
+if (window.html2canvas && window.jspdf) {
+await generatePdf(items);
+} else {
+printViaBrowser(items);
+}
+}
 
     document.getElementById("pdfReadyClose")?.addEventListener("click", () => {
     document.getElementById("pdfReady").hidden = true;
+    });
+
+    document.getElementById("resultsContainer")?.addEventListener("change", (e) => {
+      if (e.target && e.target.classList && e.target.classList.contains("pdf-select")) updatePickCount();
     });
 
     rebuildCategories(document.getElementById("problemFormat").value);

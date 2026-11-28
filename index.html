@@ -1232,7 +1232,7 @@
       const effectiveCustomNote = [formatInstruction, customNote].filter(Boolean).join(" ");
 
       btn.disabled = true;
-      btn.textContent = count >= 10 ? "ひらめき問題を考案＆検算中...（10問は30秒ほどかかります）" : "ひらめき問題を考案＆検算中...（約10〜15秒）";
+      btn.textContent = count >= 10 ? "ひらめき問題を考案＆検算中...（10問は1〜2分ほどかかる場合があります）" : "ひらめき問題を考案＆検算中...（1〜2分かかる場合があります）";
       renderLoadingSkeleton(count);
 
       const requestBody = {

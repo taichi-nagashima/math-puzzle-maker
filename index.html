@@ -510,6 +510,17 @@
       font-size: 0.9rem;
       margin-bottom: 16px;
     }
+    .key-status {
+      text-align: center;
+      padding: 8px 12px;
+      background: #fff7ed;
+      color: #9a3412;
+      border: 1px solid #fed7aa;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
 
     /* エラーパネル */
     .error-panel {
@@ -1137,7 +1148,7 @@
       ];
       let stepIdx = 0;
 
-      let cardsHtml = `<div id="loadingBanner" class="status-banner">⏳ ${steps[0]}</div>`;
+      let cardsHtml = `<div id="loadingBanner" class="status-banner">⏳ ${steps[0]}</div><div id="keyStatus" class="key-status">💭 みほさんのGeminiで考え中…</div>`;
       for (let i = 0; i < count; i++) {
         cardsHtml += `
           <div class="skeleton-card">
@@ -1162,6 +1173,12 @@
       }, 4200);
     }
 
+    function setKeyStatus(slot) {
+      const el = document.getElementById("keyStatus");
+      if (!el) return;
+      el.textContent = slot === "MAIN" ? "💭 たいちさんのGeminiで考え中…" : "💭 みほさんのGeminiで考え中…";
+    }
+
     async function callGasWithRetry(payload) {
       let lastError = null;
       for (let attempt = 1; attempt <= 4; attempt++) {
@@ -1178,12 +1195,18 @@
             body: (payload && payload.body ? payload.body : JSON.stringify(payload))
           });
           const helperResult = await response.json();
+          if (helperResult.status === "quota") {
+            const quotaErr = new Error(helperResult.message || "本日の利用上限に達しました");
+            quotaErr.code = "QUOTA";
+            throw quotaErr;
+          }
           if (helperResult.status !== "success") {
             throw new Error(helperResult.message || "生成エラーが発生しました");
           }
           return helperResult.data;
         } catch (err) {
           lastError = err;
+          if (err.code === "QUOTA") throw err;
           const isTransient = /currently experiencing high demand|high demand|overloaded|model is overloaded|503|429|temporarily|try again later|service unavailable|resource exhausted|quota exceeded|rate limit|too many requests|internal error|bad gateway|gateway timeout/i.test(err.message || "");
           if (!isTransient || attempt === 4) throw err;
         }
@@ -1212,28 +1235,39 @@
       btn.textContent = count >= 10 ? "ひらめき問題を考案＆検算中...（10問は30秒ほどかかります）" : "ひらめき問題を考案＆検算中...（約10〜15秒）";
       renderLoadingSkeleton(count);
 
+      const requestBody = {
+        category: effectiveCategory,
+        count: count,
+        ngList: getNgList(),
+        customNote: effectiveCustomNote,
+        problemFormat: problemFormat,
+        formatInstruction: formatInstruction
+      };
+      const callWithSlot = (keySlot) => callGasWithRetry({
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ ...requestBody, keySlot })
+      });
+
       try {
-        const problems = await callGasWithRetry({
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            category: effectiveCategory,
-            count: count,
-            ngList: getNgList(),
-            customNote: effectiveCustomNote,
-            problemFormat: problemFormat,
-            formatInstruction: formatInstruction
-          })
-        });
+        let problems;
+        try {
+          problems = await callWithSlot("GF");
+        } catch (firstErr) {
+          if (!firstErr || firstErr.code !== "QUOTA") throw firstErr;
+          setKeyStatus("MAIN");
+          problems = await callWithSlot("MAIN");
+        }
 
         clearInterval(loadingInterval);
         renderProblems(problems);
       } catch (err) {
         clearInterval(loadingInterval);
+        const isQuota = err && err.code === "QUOTA";
         (document.getElementById("loadingSection") || results).innerHTML = `
           <div class="error-panel">
-            <h4>⚠️ 問題の生成中に通信エラーが発生しました</h4>
-            <p style="margin:0 0 12px; font-size:0.9rem;">AIサーバーが一時的に混み合っている可能性があります。数秒待ってから、もう一度「ひらめき問題を生成する」を押してお試しください。</p>
+            <h4>${isQuota ? "⚠️ 本日の利用上限に達しました" : "⚠️ 問題の生成中に通信エラーが発生しました"}</h4>
+            <p style="margin:0 0 12px; font-size:0.9rem;">${isQuota ? "みほさん・たいちさん両方のGeminiの本日分を使い切ってしまいました。日付が変わると、また使えるようになります。" : "AIサーバーが一時的に混み合っている可能性があります。数秒待ってから、もう一度「ひらめき問題を生成する」を押してお試しください。"}</p>
             <button type="button" class="btn-sub" onclick="generateProblems()">🔄 もう一度試す</button>
             <details>
               <summary>管理者向けのエラー詳細・設定確認</summary>
